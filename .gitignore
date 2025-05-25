@@ -1,0 +1,6 @@
+# Ignorar archivos generados al compilar
+*.o
+memory_map.txt
+kernel8.list
+kernel8.img
+kernel8.elf
