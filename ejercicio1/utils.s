@@ -1,10 +1,5 @@
+    .include "constants.s"
 
-    .equ SCREEN_WIDTH, 		640
-	.equ SCREEN_HEIGH, 		480
-	.equ BITS_PER_PIXEL,  	32
-    .equ BYTES_PER_PIXEL,   4
-    
-    
     .globl draw_pixel
     .globl draw_line
     .globl draw_rectangle
@@ -25,12 +20,16 @@
     // Temporales:
     // - x9
 draw_pixel:
+    sub sp, sp, #16
+    stur x9, [sp]
     mov x9, SCREEN_WIDTH
     mul x9, x2, x9
     add x9, x1, x9
     lsl x9, x9, #2
     add x9, x0, x9
     stur w5,[x9]
+    ldur x9,[sp]
+    add sp, sp, #16
     ret
 
 
@@ -104,6 +103,7 @@ draw_h_line:
 
     sub x9, x3, x1
     sub x10, x4, x2
+
 
     cmp x10, xzr
     csneg x10, x10, x10, lt
@@ -210,7 +210,17 @@ end_draw_v_line:
     ret
 
 
-
+    // Function: draw_circunference
+    // Description: Dibuja una circunferencia en la pantalla dados su centro C = (x, y) y radio R = r. Implementamos el algoritmo de Bresenham
+    // Inputs:
+    //  -x1: coordenada x_0
+    //  -x2: coordenada y_0
+    //  -x3: radio
+    //  -x5: color
+    // Outputs: ninguno
+    // Temporales:
+    //  
+draw_circuference:
 
     
     
