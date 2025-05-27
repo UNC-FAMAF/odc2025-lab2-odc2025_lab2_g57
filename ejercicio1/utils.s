@@ -289,15 +289,70 @@ draw_v_line:
 
     ret
 
+/*  Function: draw_parallelogram.
+   Description: Dibuja un paralelogramo tomando como vertices (x0,y0), (x1,y1) y (x2,y2), calculando el restante
+                y dibujando las aristas con draw_line.
+   Inputs: x1, x2  = coordenadas (X0,Y0) del primer vertice.
+           x3, x4  = coordenadas (X1,Y1) del segundo vertice.
+           x6, x7  = coordenadas (X2,Y2) del tercer vertice.
+           x0, x11, x12, x13 ,x14 = color de las lineas. (=====CONSULTAR=====)
+   Outputs: None.
+   Temporales: x9, x10 =  coordenadas (X3,Y3) del tercer vertice.
+*/
+draw_parallelogram:
+   sub sp, sp, #16
+   stur lr, [sp]
 
 
-    
-    
+   // Calcular coordenada X del cuarto vertice. X3 = X0 + (X2 - X1).
+   sub x9, x6, x3
+   add x9, x1, x9
 
 
+   // Calcular coordenada Y del cuarto vertice. Y3 = Y0 + (Y2 - Y1).
+   sub x10, x7, x4
+   add x10, x10, x2
 
 
+   // Primer arista. P1 -> P2
+   mov x1, x1
+   mov x2, x2
+   mov x3, x3
+   mov x4, x4
+   mov x0, x11     // x11 Contiene el color de la arista a dibujar.
+   bl draw_line
 
+
+   // Seguna arista. P2 -> P3
+   mov x1, x3
+   mov x2, x4
+   mov x3, x6
+   mov x4, x7
+   mov x0, x12
+   bl draw_line
+
+
+   // Tercera arista. P3 -> P4
+   mov x1, x6
+   mov x2, x7
+   mov x3, x15
+   mov x4, x9
+   mov x0, x13
+   bl draw_line
+
+
+   // Cuarta arista. P4 -> P1
+   mov x1, x15
+   mov x2, x9
+   mov x3, x1
+   mov x4, x2
+   mov x0, x14
+   bl draw_line
+
+
+   ldur lr, [sp]
+   add sp, sp, #16
+   ret
 
 
 // ============================== Funciones matemáticas ========================
