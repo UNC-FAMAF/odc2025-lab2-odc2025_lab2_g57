@@ -2,225 +2,294 @@
 
     .globl draw_pixel
     .globl draw_line
-    .globl draw_rectangle
 
     .globl abs
     
 
 // ============================== Funciones de dibujo ===============================
-    // RECORDAR QUE X0 = dirección base del framebuffer
+    // RECORDAR QUE X28 = dirección base del framebuffer
 
     // Function: draw_pixel
     // Description: Dibuja un píxel en la pantalla en la posición (x, y) con un color dado.
     // Inputs:
+    //  -x0: color
     //  -x1: coordenada x
     //  -x2: coordenada y
-    //  -x5: color
     // Outputs: ninguno
-    // Temporales:
-    // - x9
+    // Registros modificados por esta función:
+    // - x15: dirección de la posición (x,y) calculada
 draw_pixel:
-    sub sp, sp, #16
-    stur x9, [sp]
-    mov x9, SCREEN_WIDTH
-    mul x9, x2, x9
-    add x9, x1, x9
-    lsl x9, x9, #2
-    add x9, x0, x9
-    stur w5,[x9]
-    ldur x9,[sp]
-    add sp, sp, #16
+    // offset = Dirección de inicio del framebuffer + 4 * [x + (y * 640)]
+    mov x15, SCREEN_WIDTH
+    mul x15, x2, x15
+    add x15, x1, x15
+    lsl x15, x15, #2
+    add x15, x28, x15
+    str w0, [x15]
     ret
 
 
     // Function: draw_line
     // Description: Dibuja una línea en la pantalla dados sus extremos A = (x_0, y_0) y B = (x_1 ,y_1). Implementamos el algoritmo de Bresenham
     // Inputs:
+    //  -x0: color
     //  -x1: coordenada x_0
     //  -x2: coordenada y_0
     //  -x3: coordenada x_1
     //  -x4: coordenada y_1
-    //  -x5: color
     // Outputs: ninguno
-    // Temporales:
-    // - x9: x1-x0 -> abs(x1-x0)
-    // - x10: y1-y0 -> abs(y1-y0)
-draw_line:
-    sub sp, sp, #16
-    stur lr, [sp]
+    // Registros usados:
+    // - x7: usada para pasar argumento a abs y recibir su resultado
+    // - x9: abs(x1-x0) = abs(dx)
+    // - x10: abs(y1-y0) = abs(dy)
 
+draw_line:
+    // Guardo LR y FP. Como esta función llama a otras (draw_h_line, draw_v_line, abs), lr debe guardarse. 
+    stp x29, x30, [sp,-16]!
+
+    mov x29, sp
+
+    // Calcular abs_dx = abs(x_1 - x_0)
     sub x9, x3, x1
     mov x7, x9
     bl abs
-    mov x9, x7
+    mov x9, x7     // x9 = abs(dx)
 
+     // Calcular abs_dy = abs(y_1 - y_0)
     sub x10, x4, x2
     mov x7, x10
     bl abs
-    mov x10, x7
+    mov x10, x7    // x10 = abs(dy)
 
-    cmp x9, x10
-    b.gt call_draw_h_line
+    // Los argumentos para draw_h_line y draw_v_line (x0-x4) siguen intactos. Luego para los cálculos de abs(dx) y abs(dy) uso:
+    // x7, x9, x10, que no se solapan con x0-x4.
 
+    // Acá decido qué rutina para dibujar la línea uso.
+    cmp x9, x10     //  comparo abs(dx)  y abs(dy)
+    b.gt .call_draw_h_line
+
+    // abs(dx) <= abs(dy): Línea predominantemente vertical
     bl draw_v_line
-    b end_draw_line
+    b .end_draw_line
 
-call_draw_h_line:
-    b draw_h_line
+.call_draw_h_line:
+    // abs(dx) > abs(dy): Línea predominantemente horizontal
+    bl draw_h_line
 
-end_draw_line:
-    ldur lr, [sp]
-    add sp, sp, #16
+.end_draw_line:
+    ldp x29, x30, [sp], #16     // Restaura FP y LR.
     ret
 
 
 
     // Function: draw_h_line
-    // Description: Dibuja una línea en la pantalla dados sus extremos A = (x_0, y_0) y B = (x_1 ,y_1). Implementamos el algoritmo de Bresenham
+    // Description: Dibuja una línea predominantemente horizontal. abs(dx) > abs(dy)
     // Inputs:
-    //  -x1: coordenada x_0
-    //  -x2: coordenada y_0
-    //  -x3: coordenada x_1
-    //  -x4: coordenada y_1
-    //  -x5: color
+    //  -x0: color (copia de x0)
+    //  -x1: coordenada x_0 (x_start_orig)
+    //  -x2: coordenada y_0 (y_start_orig)
+    //  -x3: coordenada x_1 (x_end_orig)
+    //  -x4: coordenada y_1 (y_end_orig)
     // Outputs: ninguno
-    // Temporales:
-    //  - x9: dx
-    //  - x10: dy
-    //  - x11: dir
-    //  - x12: variable que itera en el bucle for (y)
-    //  - x13: variable p
-    //  - x14: contador i
-    //  -x15: aux
+    // Callee-saved registers usados y que deben ser preservados::
+    //  x19: color (copia de x0)
+    //  x20: x_current (coordenada x que se incrementa)
+    //  x21: y_current (coordenada y que se actualiza con y_step)
+    //  x22: x_end_final (coordenada x final del bucle)
+    //  x23: p (parámetro de decisión del Algoritmo Bresenham)
+    //  x24: const_2_dy_abs (2 * abs(dy))
+    //  x25: const_2_dx (2 * dx, donde dx es siempre positivo)
+    //  x26: y_step (1 o -1)
+    //  (x28 es global para framebuffer, nunca lo voy a tocar)
 draw_h_line:
-    sub sp, sp, #16
-    stur x30, [sp]
-    cmp x1, x3
-    csel x1, x3, x1, gt
-    csel x3, x1, x3, gt
-    csel x2, x4, x2, gt
-    csel x4, x2, x4, gt
+    // guardo en la pila los registros callee-saved
+    stp x29, x30, [sp, #-80]!
 
-    sub x9, x3, x1
-    sub x10, x4, x2
+    mov x29, sp
+
+    stp x19, x20, [sp, #16]
+    stp x21, x22, [sp, #32]
+    stp x23, x24, [sp, #48]
+    stp x25, x26, [sp, #64] 
 
 
-    cmp x10, xzr
-    csneg x10, x10, x10, lt
-    mov x11, #1
-    csneg x11, x11, x11, lt
+    mov x19, x0                     // x19 = color_arg (copia de x0)
 
-    cbz x9, end_draw_h_line
-    mov x12, x2
-    lsl x13, x10, #1
-    sub x13, x13, x9
+    // Determinar (x_current, y_current) de inicio y x_end_final.
+    // Asegurar que x_current itera de x_menor a x_mayor.
+    cmp x1, x3                      // if (x_start_orig > x_end_orig)
+    mov x20, x1                     // x_current = x_start_orig por defecto
+    mov x21, x2                     // y_current = y_start_orig por defecto
+    mov x22, x3                     // x_end_final = x_end_orig por defecto
+    mov x6, x4                      // temp_y_end_orig = y_end_orig (para dy_orig si no hay swap)
+    b.le .Lh_points_ordered         // Si x_start_orig <= x_end_orig, ya están ordenados
 
-    mov x14, xzr
+    // Hay que intercambiar los puntos de inicio y fin para la iteración
+    mov x20, x3                     // x_current = x_end_orig (que es menor)
+    mov x21, x4                     // y_current = y_end_orig
+    mov x22, x1                     // x_end_final = x_start_orig (que es mayor)
+    mov x6, x2                      // temp_y_end_orig = y_start_orig (para dy_orig si hay swap)
+.Lh_points_ordered:
+    // Ahora: x20 es x_start_iter, x21 es y_start_iter, x22 es x_end_iter. x_current comenzará en x20.
+    // x6 tiene la y_final correspondiente a x_end_iter (x22).
 
-loop_draw_h_line:
-    cmp x14, x9
-    b.gt end_draw_h_line
+    // Calculo constantes de Bresenham
+    // dx = x_end_final - x_current (siempre positivo o cero)
+    sub x7, x22, x20                // x7 = dx (diferencia en x, ya ordenado)
+    // dy_orig = y_end_iter - y_start_iter
+    sub x8, x6, x21                 // x8 = dy_orig (diferencia en y, puede ser negativa)
 
-    add x1, x1, x14
-    mov x2, x12
-    bl draw_pixel
-    
-    cmp x13, #0
-    b.lt skip_update_y_h_line
+    mov x26, #1                     // x26 (y_step) = 1 por defecto
+    cmp x8, xzr                     // if (dy_orig < 0)
+    b.ge .Lh_dy_positive
+    neg x26, x26                    // y_step = -1
+    neg x8, x8                      // dy_abs = abs(dy_orig)
+.Lh_dy_positive:
+    // x8 ahora contiene abs(dy_orig)
 
-    add x12, x12, x11            // y += dir
-    lsl x15, x9, #1              // 2*dx
-    sub x13, x13, x15            // p -= 2*dx
+    lsl x24, x8, #1                 // x24 (const_2_dy_abs) = 2 * abs(dy_orig)
+    lsl x25, x7, #1                 // x25 (const_2_dx) = 2 * dx (x7 tiene dx)
 
-skip_update_y_h_line:
-    lsl x15, x10, #1
-    add  x13, x13, x15            // p += 2*dy
+    // p = 2*dy_abs - dx
+    sub x23, x24, x7                // x23 (p) = 2*dy_abs - dx
 
-end_draw_h_line:
-    ldur lr,[sp]
-    add sp, sp, #16
+    // --- 3. Bucle de dibujo ---
+.Lh_loop:
+    // Dibujar pixel(x_current, y_current, color)
+    // Argumentos para draw_pixel: x0=color, x1=x_coord, x2=y_coord
+    mov x0, x19                     // x0 = color_arg
+    mov x1, x20                     // x1 = x_current
+    mov x2, x21                     // x2 = y_current
+    bl draw_pixel                   // Llama a draw_pixel.
+
+    // Comprobar si hemos llegado al final
+    cmp x20, x22                    // if (x_current == x_end_final)
+    b.eq .Lh_end_loop               // Si es igual, último píxel dibujado, terminé.
+
+    // Actualizar para el siguiente píxel
+    // if (p >= 0)
+    cmp x23, xzr
+    b.lt .Lh_p_negative
+    add x21, x21, x26               // y_current += y_step
+    sub x23, x23, x25               // p -= 2*dx (const_2_dx)
+.Lh_p_negative:
+    add x23, x23, x24               // p += 2*dy_abs (const_2_dy_abs)
+    add x20, x20, #1                // x_current++
+    b .Lh_loop
+
+.Lh_end_loop:
+    ldp x19, x20, [sp, #16]
+    ldp x21, x22, [sp, #32]
+    ldp x23, x24, [sp, #48]
+    ldp x25, x26, [sp, #64]
+
+    ldp x29, x30, [sp], #80
+
     ret
 
 
-
-// ahora vertical line
-    // Function: draw_v_line
-    // Description: Dibuja una línea en la pantalla dados sus extremos A = (x_0, y_0) y B = (x_1 ,y_1). Implementamos el algoritmo de Bresenham
-    // Inputs:
-    //  -x1: coordenada x_0
-    //  -x2: coordenada y_0
-    //  -x3: coordenada x_1
-    //  -x4: coordenada y_1
-    //  -x5: color
-    // Outputs: ninguno
-    // Temporales:
-    //  - x9: dx
-    //  - x10: dy
-    //  - x11: dir
-    //  - x12: variable que itera en el bucle for (x)
-    //  - x13: variable p
-    //  - x14: contador i
-    //  - x15: aux
+// Function: draw_v_line
+// Description: Dibuja una línea predominantemente vertical. abs(dy) >= abs(dx).
+// Inputs:
+//  -x0: color
+//  -x1: x_start_orig
+//  -x2: y_start_orig
+//  -x3: x_end_orig
+//  -x4: y_end_orig
+// Outputs: ninguno
+// Callee-saved registers usados y que deben ser preservados.
+//  x19: color_arg (copia de x0)
+//  x20: x_current (coordenada x que se actualiza con x_step)
+//  x21: y_current (coordenada y que se incrementa)
+//  x22: y_end_final (coordenada y final del bucle)
+//  x23: p (parámetro de decisión de Bresenham)
+//  x24: const_2_dx_abs (2 * abs(dx_orig))
+//  x25: const_2_dy (2 * dy, donde dy es siempre positivo)
+//  x26: x_step (1 o -1)
 draw_v_line:
-    sub sp, sp, #16
-    stur x30, [sp]
-    cmp x2, x4
-    csel x1, x3, x1, gt
-    csel x3, x1, x3, gt
-    csel x2, x4, x2, gt
-    csel x4, x2, x4, gt
+    stp x29, x30, [sp, #-80]!
 
-    sub x9, x3, x1
-    sub x10, x4, x2
+    mov x29, sp
 
-    cmp x9, xzr
-    csneg x9, x9, x9, lt
-    mov x11, #1
-    csneg x11, x11, x11, lt
+    stp x19, x20, [sp, #16]
+    stp x21, x22, [sp, #32]
+    stp x23, x24, [sp, #48]
+    stp x25, x26, [sp, #64] 
 
-    cbz x10, end_draw_v_line
-    mov x12, x1
-    lsl x13, x9, #1
-    sub x13, x13, x10
+    // Copio los argumentos a los registros caller-saved y los ordeno.
+    mov x19, x0                     // x19 = color_arg
 
-    mov x14, xzr
+    // Determinar (x_current, y_current) de inicio y y_end_final.
+    // Asegurar que y_current itera de y_menor a y_mayor.
+    cmp x2, x4                      // if (y_start_orig > y_end_orig)
+    mov x20, x1                     // x_current = x_start_orig por defecto
+    mov x21, x2                     // y_current = y_start_orig por defecto
+    mov x22, x4                     // y_end_final = y_end_orig por defecto
+    mov x6, x3                      // temp_x_end_orig = x_end_orig (para dx_orig si no hay swap)
+    b.le .Lv_points_ordered
 
-loop_draw_v_line:
-    cmp x14, x10
-    b.gt end_draw_v_line
+    // Intercambiar para la iteración
+    mov x20, x3                     // x_current = x_end_orig
+    mov x21, x4                     // y_current = y_end_orig (que es menor)
+    mov x22, x2                     // y_end_final = y_start_orig (que es mayor)
+    mov x6, x1                      // temp_x_end_orig = x_start_orig (para dx_orig si hay swap)
+.Lv_points_ordered:
+    // Ahora: x20 es x_start_iter, x21 es y_start_iter, x22 es y_end_iter. y_current comenzará en x21.
+    // x6 tiene la x_final correspondiente a y_end_iter (x22).
 
-    mov x1, x12
-    add x2, x2, x14
+    // Calculo constantes de Bresenham
+    // dy = y_end_final - y_current (siempre positivo o cero)
+    sub x7, x22, x21                // x7 = dy
+    // dx_orig = x_end_iter - x_start_iter
+    sub x8, x6, x20                 // x8 = dx_orig
+
+    mov x26, #1                     // x26 (x_step) = 1
+    cmp x8, xzr                     // if (dx_orig < 0)
+    b.ge .Lv_dx_positive
+    neg x26, x26                    // x_step = -1
+    neg x8, x8                      // dx_abs = abs(dx_orig)
+.Lv_dx_positive:
+    // x8 ahora contiene abs(dx_orig)
+
+    lsl x24, x8, #1                 // x24 (const_2_dx_abs) = 2 * abs(dx_orig)
+    lsl x25, x7, #1                 // x25 (const_2_dy) = 2 * dy
+
+    // p = 2*dx_abs - dy
+    sub x23, x24, x7                // x23 (p) = 2*dx_abs - dy
+
+    // --- 3. Bucle de dibujo ---
+.Lv_loop:
+    // Dibujar pixel(x_current, y_current, color)
+    mov x0, x19                     // x0 = color
+    mov x1, x20                     // x1 = x_current
+    mov x2, x21                     // x2 = y_current
     bl draw_pixel
-    
-    cmp x13, #0
-    b.lt skip_update_y_v_line
 
-    add x12, x12, x11            // y += dir
-    lsl x15, x10, #1           // 2*dy
-    sub x13, x13, x15           // p -= 2*dy
+    // Comprobar si hemos llegado al final
+    cmp x21, x22                    // if (y_current == y_end_final)
+    b.eq .Lv_end_loop
 
-skip_update_y_v_line:
-    lsl x15, x9, #1
-    add  x13, x13, x15            // p += 2*dy
+    // Actualizar para el siguiente píxel
+    cmp x23, xzr                    // if (p >= 0)
+    b.lt .Lv_p_negative
+    add x20, x20, x26               // x_current += x_step
+    sub x23, x23, x25               // p -= 2*dy
+.Lv_p_negative:
+    add x23, x23, x24               // p += 2*dx_abs
+    add x21, x21, #1                // y_current++
+    b .Lv_loop
 
-end_draw_v_line:
-    ldur x30,[sp]
-    add sp, sp, #16
+.Lv_end_loop:
+    ldp x19, x20, [sp, #16]
+    ldp x21, x22, [sp, #32]
+    ldp x23, x24, [sp, #48]
+    ldp x25, x26, [sp, #64]
+
+    ldp x29, x30, [sp], #80
+
     ret
 
 
-    // Function: draw_circunference
-    // Description: Dibuja una circunferencia en la pantalla dados su centro C = (x, y) y radio R = r. Implementamos el algoritmo de Bresenham
-    // Inputs:
-    //  -x1: coordenada x_0
-    //  -x2: coordenada y_0
-    //  -x3: radio
-    //  -x5: color
-    // Outputs: ninguno
-    // Temporales:
-    //  
-draw_circuference:
 
     
     
@@ -237,12 +306,14 @@ draw_circuference:
     // Inputs:
     //  -x7: número signado
     // Outputs: ninguno
-    // Temporales:
-    // - x9
+    // Registros usados:
+    // - x19: tal vez sería conveniente usar un registro caller-saved para esta función tan simple. Sería más rápido que cargar x19 a la pila y descargarla luego. Tenia miedo de olvidarme de guardarla cuando llame abs. TODO
 abs:
+    str x19, [sp, -8]!
     cmp x7, #0           // Compara x7 con 0, actualiza flags
-    neg x9, x0           // x9 = -x7 (por si x7 < 0)
-    csel x7, x7, x9, GE  // si x7 >= 0 -> x7 = x7, si no -> x7 = -x7
+    neg x19, x7           // x19 = -x7 (por si x7 < 0)
+    csel x7, x7, x19, GE  // si x7 >= 0 -> x7 = x7, si no -> x7 = -x7
+    ldr x19, [sp], 8
     ret
 
     
