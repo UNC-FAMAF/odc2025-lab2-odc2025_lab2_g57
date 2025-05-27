@@ -66,17 +66,17 @@ draw_line:
 
     // Acá decido qué rutina para dibujar la línea uso.
     cmp x9, x10     //  comparo abs(dx)  y abs(dy)
-    b.gt .call_draw_h_line
+    b.gt ._call_draw_h_line
 
     // abs(dx) <= abs(dy): Línea predominantemente vertical
     bl draw_v_line
-    b .end_draw_line
+    b ._end_draw_line
 
-.call_draw_h_line:
+._call_draw_h_line:
     // abs(dx) > abs(dy): Línea predominantemente horizontal
     bl draw_h_line
 
-.end_draw_line:
+._end_draw_line:
     ldp x29, x30, [sp], #16     // Restaura FP y LR.
     ret
 
@@ -122,14 +122,14 @@ draw_h_line:
     mov x21, x2                     // y_current = y_start_orig por defecto
     mov x22, x3                     // x_end_final = x_end_orig por defecto
     mov x6, x4                      // temp_y_end_orig = y_end_orig (para dy_orig si no hay swap)
-    b.le .Lh_points_ordered         // Si x_start_orig <= x_end_orig, ya están ordenados
+    b.le ._h_points_ordered         // Si x_start_orig <= x_end_orig, ya están ordenados
 
     // Hay que intercambiar los puntos de inicio y fin para la iteración
     mov x20, x3                     // x_current = x_end_orig (que es menor)
     mov x21, x4                     // y_current = y_end_orig
     mov x22, x1                     // x_end_final = x_start_orig (que es mayor)
     mov x6, x2                      // temp_y_end_orig = y_start_orig (para dy_orig si hay swap)
-.Lh_points_ordered:
+._h_points_ordered:
     // Ahora: x20 es x_start_iter, x21 es y_start_iter, x22 es x_end_iter. x_current comenzará en x20.
     // x6 tiene la y_final correspondiente a x_end_iter (x22).
 
@@ -141,10 +141,10 @@ draw_h_line:
 
     mov x26, #1                     // x26 (y_step) = 1 por defecto
     cmp x8, xzr                     // if (dy_orig < 0)
-    b.ge .Lh_dy_positive
+    b.ge ._h_dy_positive
     neg x26, x26                    // y_step = -1
     neg x8, x8                      // dy_abs = abs(dy_orig)
-.Lh_dy_positive:
+._h_dy_positive:
     // x8 ahora contiene abs(dy_orig)
 
     lsl x24, x8, #1                 // x24 (const_2_dy_abs) = 2 * abs(dy_orig)
@@ -153,8 +153,8 @@ draw_h_line:
     // p = 2*dy_abs - dx
     sub x23, x24, x7                // x23 (p) = 2*dy_abs - dx
 
-    // --- 3. Bucle de dibujo ---
-.Lh_loop:
+    // Bucle de dibujo
+._h_loop:
     // Dibujar pixel(x_current, y_current, color)
     // Argumentos para draw_pixel: x0=color, x1=x_coord, x2=y_coord
     mov x0, x19                     // x0 = color_arg
@@ -164,20 +164,20 @@ draw_h_line:
 
     // Comprobar si hemos llegado al final
     cmp x20, x22                    // if (x_current == x_end_final)
-    b.eq .Lh_end_loop               // Si es igual, último píxel dibujado, terminé.
+    b.eq ._h_end_loop               // Si es igual, último píxel dibujado, terminé.
 
     // Actualizar para el siguiente píxel
     // if (p >= 0)
     cmp x23, xzr
-    b.lt .Lh_p_negative
+    b.lt ._h_p_negative
     add x21, x21, x26               // y_current += y_step
     sub x23, x23, x25               // p -= 2*dx (const_2_dx)
-.Lh_p_negative:
+._h_p_negative:
     add x23, x23, x24               // p += 2*dy_abs (const_2_dy_abs)
     add x20, x20, #1                // x_current++
-    b .Lh_loop
+    b ._h_loop
 
-.Lh_end_loop:
+._h_end_loop:
     ldp x19, x20, [sp, #16]
     ldp x21, x22, [sp, #32]
     ldp x23, x24, [sp, #48]
@@ -226,14 +226,14 @@ draw_v_line:
     mov x21, x2                     // y_current = y_start_orig por defecto
     mov x22, x4                     // y_end_final = y_end_orig por defecto
     mov x6, x3                      // temp_x_end_orig = x_end_orig (para dx_orig si no hay swap)
-    b.le .Lv_points_ordered
+    b.le ._v_points_ordered
 
     // Intercambiar para la iteración
     mov x20, x3                     // x_current = x_end_orig
     mov x21, x4                     // y_current = y_end_orig (que es menor)
     mov x22, x2                     // y_end_final = y_start_orig (que es mayor)
     mov x6, x1                      // temp_x_end_orig = x_start_orig (para dx_orig si hay swap)
-.Lv_points_ordered:
+._v_points_ordered:
     // Ahora: x20 es x_start_iter, x21 es y_start_iter, x22 es y_end_iter. y_current comenzará en x21.
     // x6 tiene la x_final correspondiente a y_end_iter (x22).
 
@@ -245,10 +245,10 @@ draw_v_line:
 
     mov x26, #1                     // x26 (x_step) = 1
     cmp x8, xzr                     // if (dx_orig < 0)
-    b.ge .Lv_dx_positive
+    b.ge ._v_dx_positive
     neg x26, x26                    // x_step = -1
     neg x8, x8                      // dx_abs = abs(dx_orig)
-.Lv_dx_positive:
+._v_dx_positive:
     // x8 ahora contiene abs(dx_orig)
 
     lsl x24, x8, #1                 // x24 (const_2_dx_abs) = 2 * abs(dx_orig)
@@ -257,8 +257,8 @@ draw_v_line:
     // p = 2*dx_abs - dy
     sub x23, x24, x7                // x23 (p) = 2*dx_abs - dy
 
-    // --- 3. Bucle de dibujo ---
-.Lv_loop:
+    // Bucle de dibujo
+._v_loop:
     // Dibujar pixel(x_current, y_current, color)
     mov x0, x19                     // x0 = color
     mov x1, x20                     // x1 = x_current
@@ -267,19 +267,19 @@ draw_v_line:
 
     // Comprobar si hemos llegado al final
     cmp x21, x22                    // if (y_current == y_end_final)
-    b.eq .Lv_end_loop
+    b.eq ._v_end_loop
 
     // Actualizar para el siguiente píxel
     cmp x23, xzr                    // if (p >= 0)
-    b.lt .Lv_p_negative
+    b.lt ._v_p_negative
     add x20, x20, x26               // x_current += x_step
     sub x23, x23, x25               // p -= 2*dy
-.Lv_p_negative:
+._v_p_negative:
     add x23, x23, x24               // p += 2*dx_abs
     add x21, x21, #1                // y_current++
-    b .Lv_loop
+    b ._v_loop
 
-.Lv_end_loop:
+._v_end_loop:
     ldp x19, x20, [sp, #16]
     ldp x21, x22, [sp, #32]
     ldp x23, x24, [sp, #48]
