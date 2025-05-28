@@ -2,7 +2,7 @@
 
     .globl draw_pixel
     .globl draw_line
-
+    .globl draw_rectangle
     .globl abs
     
 
@@ -353,6 +353,59 @@ draw_parallelogram:
    ldur lr, [sp]
    add sp, sp, #16
    ret
+
+
+// Function: draw_rectangle
+// Description: Dibuja un rectangulo en la pantalla dadop dos vertices opuestos: (x0, y0) y (x1, y1).
+// Inputs:
+//  -x0: color
+//  -x1: coordenada x del vertice superior izquierdo
+//  -x2: coordenada y del vertice superior izquierdo
+//  -x3: coordenada x del vertice inferior derecho
+//  -x4: coordenada y del vertice inferior derecho
+// Outputs: no hay
+// Registros modificados: ninguno aparte de los temporales
+
+draw_rectangle:
+    // Guardar los registros y reservar espacio en la pila
+    sub sp, sp, #48         // Reservar 48 bytes: 16 para x29/x30, 32 para x1-x4
+    stp x29, x30, [sp, #0]  // Guardar FP y LR
+    mov x29, sp             // Actualizar FP
+    stp x1, x2, [sp, #16]   // Guardar x0_start y y0_start
+    stp x3, x4, [sp, #32]   // Guardar x1_end y y1_end
+
+    // Dibujar linea superior: de (x0_start, y0_start) a (x1_end, y0_start)
+    ldr x1, [x29, #16]      // x1 = x0_start
+    ldr x2, [x29, #24]      // x2 = y0_start
+    ldr x3, [x29, #32]      // x3 = x1_end
+    ldr x4, [x29, #24]      // x4 = y0_start
+    bl draw_line
+
+    // Dibujar linea derecha: de (x1_end, y0_start) a (x1_end, y1_end)
+    ldr x1, [x29, #32]      // x1 = x1_end
+    ldr x2, [x29, #24]      // x2 = y0_start
+    ldr x3, [x29, #32]      // x3 = x1_end
+    ldr x4, [x29, #40]      // x4 = y1_end
+    bl draw_line
+
+    // Dibujar linea inferior: de (x1_end, y1_end) a (x0_start, y1_end)
+    ldr x1, [x29, #32]      // x1 = x1_end
+    ldr x2, [x29, #40]      // x2 = y1_end
+    ldr x3, [x29, #16]      // x3 = x0_start
+    ldr x4, [x29, #40]      // x4 = y1_end
+    bl draw_line
+
+    // Dibujar linea izquierda: de (x0_start, y1_end) a (x0_start, y0_start)
+    ldr x1, [x29, #16]      // x1 = x0_start
+    ldr x2, [x29, #40]      // x2 = y1_end
+    ldr x3, [x29, #16]      // x3 = x0_start
+    ldr x4, [x29, #24]      // x4 = y0_start
+    bl draw_line
+
+    // Restaurar registros y pila
+    ldp x29, x30, [sp, #0]  // Restaurar FP y LR
+    add sp, sp, #48         // Liberar espacio en la pila
+    ret
 
 
 // ============================== Funciones matemáticas ========================
