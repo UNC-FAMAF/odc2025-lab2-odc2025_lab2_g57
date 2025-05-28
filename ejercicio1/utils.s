@@ -3,6 +3,7 @@
     .globl draw_pixel
     .globl draw_line
     .globl draw_rectangle
+    .globl draw_semi_circle
     .globl abs
     
 
@@ -405,6 +406,124 @@ draw_rectangle:
     // Restaurar registros y pila
     ldp x29, x30, [sp, #0]  // Restaurar FP y LR
     add sp, sp, #48         // Liberar espacio en la pila
+    ret
+
+
+
+// Function: draw_semi_circle
+// Description: Dibuja un semicrculo en la pantalla dado su centro (x0, y0), radio r, y direccion.
+// Inputs:
+//  -x0: color
+//  -x1: coordenada x del centro
+//  -x2: coordenada y del centro
+//  -x3: radio r
+//  -x4: direccion (0: arriba, 1: abajo, 2: izquierda, 3: derecha)
+// Outputs: no hay
+// Registros modificados: ninguno aparte de los temporales
+
+draw_semi_circle:
+    // Guardar los registros y reservar espacio en la pila
+    sub sp, sp, #64         // Reservar 64 bytes: 16 para x29/x30, 48 para temporales
+    stp x29, x30, [sp, #0]  // Guardar FP y LR
+    mov x29, sp             // Actualizar FP
+    stp x19, x20, [sp, #16] // Guardar x19, x20
+    stp x21, x22, [sp, #32] // Guardar x21, x22
+    stp x23, x24, [sp, #48] // Guardar x23, x24
+
+    // Copiar los parametros a registros temporales
+    mov x19, x0             // x19 = color
+    mov x20, x1             // x20 = x_center
+    mov x21, x2             // x21 = y_center
+    mov x22, x3             // x22 = radius
+    mov x23, x4             // x23 = direction
+
+    // Inicializar variables para el algoritmo de Bresenham
+    mov x24, #0             // x = 0
+    mov x25, x22            // y = radius
+    sub x26, xzr, x22       // d = -radius
+
+    // Bucle principal del algoritmo de Bresenham
+._semi_circle_loop:
+    // Dibujar los pixeles segun la direccion
+    cmp x23, #0             // Direccion: arriba
+    b.eq ._draw_upper
+    cmp x23, #1             // Direccion: abajo
+    b.eq ._draw_lower
+    cmp x23, #2             // Direccion: izquierda
+    b.eq ._draw_left
+    cmp x23, #3             // Direccion: derecha
+    b.eq ._draw_right
+    b ._end_semi_circle     // Direccion no valida, salir
+
+._draw_upper:
+    // Dibujar los pixeles en la parte superior
+    mov x0, x19             // color
+    add x1, x20, x24        // x_center + x
+    sub x2, x21, x25        // y_center - y
+    bl draw_pixel
+    mov x0, x19
+    sub x1, x20, x24        // x_center - x
+    sub x2, x21, x25        // y_center - y
+    bl draw_pixel
+    b ._update_loop
+
+._draw_lower:
+    // Dibujar los pixeles en la parte inferior
+    mov x0, x19
+    add x1, x20, x24
+    add x2, x21, x25
+    bl draw_pixel
+    mov x0, x19
+    sub x1, x20, x24
+    add x2, x21, x25
+    bl draw_pixel
+    b ._update_loop
+
+._draw_left:
+    // Dibujar los pixeles en la parte izquierda
+    mov x0, x19
+    sub x1, x20, x25
+    add x2, x21, x24
+    bl draw_pixel
+    mov x0, x19
+    sub x1, x20, x25
+    sub x2, x21, x24
+    bl draw_pixel
+    b ._update_loop
+
+._draw_right:
+    // Dibujar los pixeles en la parte derecha
+    mov x0, x19
+    add x1, x20, x25
+    add x2, x21, x24
+    bl draw_pixel
+    mov x0, x19
+    add x1, x20, x25
+    sub x2, x21, x24
+    bl draw_pixel
+    b ._update_loop
+
+._update_loop:
+    // Actualizar las variables de Bresenham
+    add x26, x26, x24, lsl #1
+    add x26, x26, #1
+    add x24, x24, #1
+    cmp x26, #0
+    b.lt ._skip_y_decrement
+    sub x25, x25, #1
+    sub x26, x26, x25, lsl #1
+    sub x26, x26, #1
+._skip_y_decrement:
+    cmp x24, x25
+    b.le ._semi_circle_loop
+
+._end_semi_circle:
+    // Restaurar los registros y pila
+    ldp x19, x20, [sp, #16]
+    ldp x21, x22, [sp, #32]
+    ldp x23, x24, [sp, #48]
+    ldp x29, x30, [sp, #0]
+    add sp, sp, #64
     ret
 
 
