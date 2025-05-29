@@ -192,62 +192,62 @@ draw_parallelogram:
    ret
 
 
-// Function: draw_rectangle
-// Description: Dibuja un rectangulo en la pantalla dadop dos vertices opuestos: (x0, y0) y (x1, y1).
-// Inputs:
-//  -x0: color
-//  -x1: coordenada x del vertice superior izquierdo
-//  -x2: coordenada y del vertice superior izquierdo
-//  -x3: coordenada x del vertice inferior derecho
-//  -x4: coordenada y del vertice inferior derecho
-// Outputs: no hay
-// Registros modificados: ninguno aparte de los temporales
-
 draw_rectangle:
-    // Guardar los registros y reservar espacio en la pila
-    sub sp, sp, #48         // Reservar 48 bytes: 16 para x29/x30, 32 para x1-x4
+    // Guardar registros en la pila
+    sub sp, sp, #64         // Reservar espacio para variables locales y registros
     stp x29, x30, [sp, #0]  // Guardar FP y LR
     mov x29, sp             // Actualizar FP
-    stp x1, x2, [sp, #16]   // Guardar x0_start y y0_start
-    stp x3, x4, [sp, #32]   // Guardar x1_end y y1_end
+    stp x19, x20, [sp, #16] // Guardar registros temporales
+    stp x21, x22, [sp, #32] // Guardar más registros
+    stp x23, x24, [sp, #48] // Guardar más registros
 
-    // Dibujar linea superior: de (x0_start, y0_start) a (x1_end, y0_start)
-    ldr x1, [x29, #16]      // x1 = x0_start
-    ldr x2, [x29, #24]      // x2 = y0_start
-    ldr x3, [x29, #32]      // x3 = x1_end
-    ldr x4, [x29, #24]      // x4 = y0_start
-    bl draw_line
+    // Copiar parámetros a registros temporales
+    mov x19, x0             // x19 = color
+    mov x20, x1             // x20 = x_start
+    mov x21, x2             // x21 = y_start
+    mov x22, x3             // x22 = x_end
+    mov x23, x4             // x23 = y_end
 
-    // Dibujar linea derecha: de (x1_end, y0_start) a (x1_end, y1_end)
-    ldr x1, [x29, #32]      // x1 = x1_end
-    ldr x2, [x29, #24]      // x2 = y0_start
-    ldr x3, [x29, #32]      // x3 = x1_end
-    ldr x4, [x29, #40]      // x4 = y1_end
-    bl draw_line
+    // Bucle exterior: iterar sobre y desde y_start hasta y_end
+    mov x24, x21            // x24 = y_current = y_start
+outer_loop:
+    cmp x24, x23            // Comparar y_current con y_end
+    b.gt end_outer_loop     // Si y_current > y_end, salir
 
-    // Dibujar linea inferior: de (x1_end, y1_end) a (x0_start, y1_end)
-    ldr x1, [x29, #32]      // x1 = x1_end
-    ldr x2, [x29, #40]      // x2 = y1_end
-    ldr x3, [x29, #16]      // x3 = x0_start
-    ldr x4, [x29, #40]      // x4 = y1_end
-    bl draw_line
+    // Bucle interior: iterar sobre x desde x_start hasta x_end
+    mov x25, x20            // x25 = x_current = x_start
+inner_loop:
+    cmp x25, x22            // Comparar x_current con x_end
+    b.gt end_inner_loop     // Si x_current > x_end, salir del bucle interior
 
-    // Dibujar linea izquierda: de (x0_start, y1_end) a (x0_start, y0_start)
-    ldr x1, [x29, #16]      // x1 = x0_start
-    ldr x2, [x29, #40]      // x2 = y1_end
-    ldr x3, [x29, #16]      // x3 = x0_start
-    ldr x4, [x29, #24]      // x4 = y0_start
-    bl draw_line
+    // Dibujar pixel en (x_current, y_current) con color
+    mov x0, x19             // x0 = color
+    mov x1, x25             // x1 = x_current
+    mov x2, x24             // x2 = y_current
+    bl draw_pixel           // Llamar a draw_pixel
+
+    // Incrementar x_current
+    add x25, x25, #1        // x_current++
+    b inner_loop            // Volver al inicio del bucle interior
+end_inner_loop:
+
+    // Incrementar y_current
+    add x24, x24, #1        // y_current++
+    b outer_loop            // Volver al inicio del bucle exterior
+end_outer_loop:
 
     // Restaurar registros y pila
+    ldp x19, x20, [sp, #16] // Restaurar x19, x20
+    ldp x21, x22, [sp, #32] // Restaurar x21, x22
+    ldp x23, x24, [sp, #48] // Restaurar x23, x24
     ldp x29, x30, [sp, #0]  // Restaurar FP y LR
-    add sp, sp, #48         // Liberar espacio en la pila
+    add sp, sp, #64         // Liberar espacio en la pila
     ret
 
 
 
 // Function: draw_semi_circle
-// Description: Dibuja un semicrculo en la pantalla dado su centro (x0, y0), radio r, y direccion.
+// Description: Dibuja un semicirculo relleno en la pantalla dado su centro (x0, y0), radio r, y direccin.
 // Inputs:
 //  -x0: color
 //  -x1: coordenada x del centro
@@ -266,7 +266,7 @@ draw_semi_circle:
     stp x21, x22, [sp, #32] // Guardar x21, x22
     stp x23, x24, [sp, #48] // Guardar x23, x24
 
-    // Copiar los parametros a registros temporales
+    // Copiar los parámetros a registros temporales
     mov x19, x0             // x19 = color
     mov x20, x1             // x20 = x_center
     mov x21, x2             // x21 = y_center
@@ -280,7 +280,7 @@ draw_semi_circle:
 
     // Bucle principal del algoritmo de Bresenham
 ._semi_circle_loop:
-    // Dibujar los pixeles segun la direccion
+    // Dibujar las lineas según la dirección
     cmp x23, #0             // Direccion: arriba
     b.eq ._draw_upper
     cmp x23, #1             // Direccion: abajo
@@ -292,51 +292,43 @@ draw_semi_circle:
     b ._end_semi_circle     // Direccion no valida, salir
 
 ._draw_upper:
-    // Dibujar los pixeles en la parte superior
+    // Dibujar linea horizontal desde (x_center - x, y_center - y) hasta (x_center + x, y_center - y)
     mov x0, x19             // color
-    add x1, x20, x24        // x_center + x
-    sub x2, x21, x25        // y_center - y
-    bl draw_pixel
-    mov x0, x19
-    sub x1, x20, x24        // x_center - x
-    sub x2, x21, x25        // y_center - y
-    bl draw_pixel
+    sub x1, x20, x24        // x_start = x_center - x
+    sub x2, x21, x25        // y_start = y_center - y
+    add x3, x20, x24        // x_end = x_center + x
+    mov x4, x2              // y_end = y_start (misma y para linea horizontal)
+    bl draw_line
     b ._update_loop
 
 ._draw_lower:
-    // Dibujar los pixeles en la parte inferior
-    mov x0, x19
-    add x1, x20, x24
-    add x2, x21, x25
-    bl draw_pixel
-    mov x0, x19
-    sub x1, x20, x24
-    add x2, x21, x25
-    bl draw_pixel
+    // Dibujar linea horizontal desde (x_center - x, y_center + y) hasta (x_center + x, y_center + y)
+    mov x0, x19             // color
+    sub x1, x20, x24        // x_start = x_center - x
+    add x2, x21, x25        // y_start = y_center + y
+    add x3, x20, x24        // x_end = x_center + x
+    mov x4, x2              // y_end = y_start (misma y para linea horizontal)
+    bl draw_line
     b ._update_loop
 
 ._draw_left:
-    // Dibujar los pixeles en la parte izquierda
-    mov x0, x19
-    sub x1, x20, x25
-    add x2, x21, x24
-    bl draw_pixel
-    mov x0, x19
-    sub x1, x20, x25
-    sub x2, x21, x24
-    bl draw_pixel
+    // Dibujar linea vertical desde (x_center - y, y_center - x) hasta (x_center - y, y_center + x)
+    mov x0, x19             // color
+    sub x1, x20, x25        // x_start = x_center - y
+    sub x2, x21, x24        // y_start = y_center - x
+    mov x3, x1              // x_end = x_start (misma x para línea vertical)
+    add x4, x21, x24        // y_end = y_center + x
+    bl draw_line
     b ._update_loop
 
 ._draw_right:
-    // Dibujar los pixeles en la parte derecha
-    mov x0, x19
-    add x1, x20, x25
-    add x2, x21, x24
-    bl draw_pixel
-    mov x0, x19
-    add x1, x20, x25
-    sub x2, x21, x24
-    bl draw_pixel
+    // Dibujar linea vertical desde (x_center + y, y_center - x) hasta (x_center + y, y_center + x)
+    mov x0, x19             // color
+    add x1, x20, x25        // x_start = x_center + y
+    sub x2, x21, x24        // y_start = y_center - x
+    mov x3, x1              // x_end = x_start (misma x para linea vertical)
+    add x4, x21, x24        // y_end = y_center + x
+    bl draw_line
     b ._update_loop
 
 ._update_loop:
