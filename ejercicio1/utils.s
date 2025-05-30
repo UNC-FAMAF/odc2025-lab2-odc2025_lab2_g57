@@ -4,6 +4,8 @@
     .globl draw_line
     .globl draw_rectangle
     .globl draw_semi_circle
+    .globl draw_circle
+
     .globl abs
     
 
@@ -118,12 +120,95 @@ draw_line:
 
     ret
 
+/*  Function: draw_circle.
+   Description:
+   Inputs:  x3, x4 = xc, yc (coordenadas del centro del circulo)   
+            x0 = color del circulo
+            x5 = radio del circulo
+   Outputs: ninguno
+   Temporales: x9, x10 = x, y (coordenadas para dibujar) 
+               x11 = p //
+               x12, x13 (auxiliares)
+*/
+draw_circle:
+    str lr, [sp, #-8]!
 
+    mov x9, xzr                 // x=0
+    sub x10, xzr, x5            // y=-r
+    sub x11, xzr, x5            // p=-r
 
+    ._loop:
+        sub x12, xzr, x10
+        cmp x9, x12
+        b.ge ._end          // if x>=-y --> fin del loop (equivale a un while x<-y)
 
+        cmp x11, xzr
+        b.gt ._if
+        b ._else            // if p>0, else;
 
+        ._if:
+            add x10, x10, #1
+            add x13, x9, x10
+            lsl x13, x13, #1
+            add x13, x13, #1
+            add x11, x11, x13           // p += 2*(x+y)+1
+            b ._draw
 
+        ._else:
+            lsl x13, x9, #1
+            add x13, x13, #1      
+            add x11, x11, x13           // p += 2*x+1
+            b ._draw
 
+        ._draw:
+            // en x0 se almacena el color del circulo, por lo tanto tambien se usa para cada pixel
+
+            // pinto pixel en (xc+x, yc+y)
+            add x1, x3, x9
+            add x2, x4, x10
+            bl draw_pixel
+
+            // pinto pixel en (xc-x, yc+y)
+            sub x1, x3, x9
+            add x2, x4, x10
+            bl draw_pixel
+
+            // pinto pixel en (xc+x, yc-y)
+            add x1, x3, x9
+            sub x2, x4, x10
+            bl draw_pixel
+
+            // pinto pixel en (xc-x, yc-y)
+            sub x1, x3, x9
+            sub x2, x4, x10
+            bl draw_pixel
+
+            // pinto pixel en (xc+y, yc+x)
+            add x1, x3, x10
+            add x2, x4, x9
+            bl draw_pixel
+
+            // pinto pixel en (xc+y, yc-x)
+            add x1, x3, x10
+            sub x2, x4, x9
+            bl draw_pixel
+
+            // pinto pixel en (xc-y, yc+x)
+            sub x1, x3, x10
+            add x2, x4, x9
+            bl draw_pixel
+
+            // pinto pixel en (xc-y, yc-x)
+            sub x1, x3, x10
+            sub x2, x4, x9
+            bl draw_pixel
+
+            add x9, x9, #1          // x++
+            b ._loop
+
+    ._end:
+    ldr lr, [sp], #8
+    ret 
 
 
 /*  Function: draw_parallelogram.
