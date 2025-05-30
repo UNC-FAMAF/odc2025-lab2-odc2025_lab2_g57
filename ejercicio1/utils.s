@@ -121,13 +121,14 @@ draw_line:
     ret
 
 /*  Function: draw_circle.
-   Description:
+   Description: Dibuja un circulo (sin relleno) dadas sus coordenadas del centro (x,y), un radio y un color. 
+                'Midpoint Circle Algorithm'
    Inputs:  x3, x4 = xc, yc (coordenadas del centro del circulo)   
             x0 = color del circulo
             x5 = radio del circulo
    Outputs: ninguno
    Temporales: x9, x10 = x, y (coordenadas para dibujar) 
-               x11 = p //
+               x11 = p (criterio de seleccion)  
                x12, x13 (auxiliares)
 */
 draw_circle:
