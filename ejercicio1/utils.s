@@ -36,7 +36,7 @@ draw_pixel:
     // Function: draw_line
     // Description: Dibuja una línea en la pantalla dados sus extremos A = (x_0, y_0) y B = (x_1 ,y_1). 
     // Implementamos el algoritmo de Bresenham. https://zingl.github.io/bresenham.html
-    // Inputs:
+    // Inputs (no preservados):
     //  -x0: color
     //  -x1: coordenada x_0
     //  -x2: coordenada y_0
@@ -44,7 +44,7 @@ draw_pixel:
     //  -x4: coordenada y_1
     // Outputs: ninguno
     // Registros usados:
-    // - x7: usada para pasar argumento a abs y recibir su resultado
+    // - x7: usada para pasar argumento a abs y recibir su resultado  (no preservado)
     // - x19: dx
     // - x20: dy
     // - x21: err
