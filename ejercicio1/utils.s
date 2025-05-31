@@ -6,7 +6,6 @@
     .globl draw_semi_circle
     .globl draw_circle
     .globl draw_fill_circle
-
     .globl abs
     
 
@@ -492,13 +491,15 @@ end_outer_loop:
 
 
 // Function: draw_semi_circle
-// Description: Dibuja un semicirculo relleno en la pantalla dado su centro (x0, y0), radio r, y direccin.
+// Description: Dibuja un semicirculo en la pantalla dado su centro (x0, y0), radio r, y direccion.
+//              Puede ser relleno o no, dependiendo del parametro fill_flag.
 // Inputs:
 //  -x0: color
 //  -x1: coordenada x del centro
 //  -x2: coordenada y del centro
 //  -x3: radio r
 //  -x4: direccion (0: arriba, 1: abajo, 2: izquierda, 3: derecha)
+//  -x5: fill_flag (0: no relleno, 1: relleno)
 // Outputs: no hay
 // Registros modificados: ninguno aparte de los temporales
 
@@ -517,6 +518,7 @@ draw_semi_circle:
     mov x21, x2             // x21 = y_center
     mov x22, x3             // x22 = radius
     mov x23, x4             // x23 = direction
+    // x5 = fill_flag, se usará directamente
 
     // Inicializar variables para el algoritmo de Bresenham
     mov x24, #0             // x = 0
@@ -525,7 +527,7 @@ draw_semi_circle:
 
     // Bucle principal del algoritmo de Bresenham
 ._semi_circle_loop:
-    // Dibujar las lineas según la dirección
+    // Dibujar según la dirección
     cmp x23, #0             // Direccion: arriba
     b.eq ._draw_upper
     cmp x23, #1             // Direccion: abajo
@@ -537,41 +539,89 @@ draw_semi_circle:
     b ._end_semi_circle     // Direccion no valida, salir
 
 ._draw_upper:
+    cmp x5, #1
+    b.eq ._draw_line_upper
+    // Dibujar puntos para contorno
+    mov x0, x19             // color
+    sub x1, x20, x24        // x_center - x
+    sub x2, x21, x25        // y_center - y
+    bl draw_pixel
+    add x1, x20, x24        // x_center + x
+    sub x2, x21, x25        // y_center - y
+    bl draw_pixel
+    b ._update_loop
+._draw_line_upper:
     // Dibujar linea horizontal desde (x_center - x, y_center - y) hasta (x_center + x, y_center - y)
     mov x0, x19             // color
     sub x1, x20, x24        // x_start = x_center - x
     sub x2, x21, x25        // y_start = y_center - y
     add x3, x20, x24        // x_end = x_center + x
-    mov x4, x2              // y_end = y_start (misma y para linea horizontal)
+    mov x4, x2              // y_end = y_start
     bl draw_line
     b ._update_loop
 
 ._draw_lower:
+    cmp x5, #1
+    b.eq ._draw_line_lower
+    // Dibujar puntos para contorno
+    mov x0, x19             // color
+    sub x1, x20, x24        // x_center - x
+    add x2, x21, x25        // y_center + y
+    bl draw_pixel
+    add x1, x20, x24        // x_center + x
+    add x2, x21, x25        // y_center + y
+    bl draw_pixel
+    b ._update_loop
+._draw_line_lower:
     // Dibujar linea horizontal desde (x_center - x, y_center + y) hasta (x_center + x, y_center + y)
     mov x0, x19             // color
     sub x1, x20, x24        // x_start = x_center - x
     add x2, x21, x25        // y_start = y_center + y
     add x3, x20, x24        // x_end = x_center + x
-    mov x4, x2              // y_end = y_start (misma y para linea horizontal)
+    mov x4, x2              // y_end = y_start
     bl draw_line
     b ._update_loop
 
 ._draw_left:
+    cmp x5, #1
+    b.eq ._draw_line_left
+    // Dibujar puntos para contorno
+    mov x0, x19             // color
+    sub x1, x20, x25        // x_center - y
+    sub x2, x21, x24        // y_center - x
+    bl draw_pixel
+    sub x1, x20, x25        // x_center - y
+    add x2, x21, x24        // y_center + x
+    bl draw_pixel
+    b ._update_loop
+._draw_line_left:
     // Dibujar linea vertical desde (x_center - y, y_center - x) hasta (x_center - y, y_center + x)
     mov x0, x19             // color
     sub x1, x20, x25        // x_start = x_center - y
     sub x2, x21, x24        // y_start = y_center - x
-    mov x3, x1              // x_end = x_start (misma x para línea vertical)
+    mov x3, x1              // x_end = x_start
     add x4, x21, x24        // y_end = y_center + x
     bl draw_line
     b ._update_loop
 
 ._draw_right:
+    cmp x5, #1
+    b.eq ._draw_line_right
+    // Dibujar puntos para contorno
+    mov x0, x19             // color
+    add x1, x20, x25        // x_center + y
+    sub x2, x21, x24        // y_center - x
+    bl draw_pixel
+    add x1, x20, x25        // x_center + y
+    add x2, x21, x24        // y_center + x
+    bl draw_pixel
+    b ._update_loop
+._draw_line_right:
     // Dibujar linea vertical desde (x_center + y, y_center - x) hasta (x_center + y, y_center + x)
     mov x0, x19             // color
     add x1, x20, x25        // x_start = x_center + y
     sub x2, x21, x24        // y_start = y_center - x
-    mov x3, x1              // x_end = x_start (misma x para linea vertical)
+    mov x3, x1              // x_end = x_start
     add x4, x21, x24        // y_end = y_center + x
     bl draw_line
     b ._update_loop
