@@ -1,289 +1,136 @@
 .include "constants.s"
 
-.globl background
+.globl background_gradient
 .globl draw_sand
 .globl draw_road
 .globl draw_edificios_fondo
 
-
-background:
+/**
+ * Function: background_gradient
+ * Description: Pinta un fondo degrado vertical hasta más de la mitad de la pantalla. Luego, pinta lo restante con el color final.
+ *              Se hace uso de interpolación lineal por porcentaje escalar.
+ * Registros caller-saved (Es decir, no preservados. Responsabilidad del caller!):
+ * - x0: color inicial
+ * - x1: color final
+ * - x2: contador y
+ * - x3: contador x
+ * - x4: porcentaje de avance
+ * - x5: R_actual
+ * - x6: G_actual
+ * - x7: B_actual
+ * - x8: R_inicial
+ * - x9: G_inicial
+ * - x10: B_inicial
+ * - x11: R_final
+ * - x12: G_final
+ * - x13: B_final
+ * - x14: delta(R)
+ * - x15: delta(G)
+ * - x16: delta(B)
+ * Registros callee-saved usados:
+ * - x19: 255 guardado en un registro. Lo uso para escalar el porcentaje.
+ * - x20: 260 guardado en un registro. Es la cantidad de filas que quiero que haya degradado de color a color.
+ * - x21: color a pintar.
+ * - x28: dirección base del frame buffer.
+ **/
+background_gradient:
+    // Guardo registros callee-saved usados
+    stp x19, x20, [sp, #-16]!
+    stp x21, x28, [sp, #-16]!
     str x30, [sp, #-8]!
 
-    // Franja 0 - Color: #40D0CF
-    movz x0, 0x40, lsl #16
-    movk x0, 0xD0CF, lsl #0
-    mov x1, 0
-    mov x2, 0
-    mov x3, 640
-    mov x4, 8
-    bl draw_rectangle
+    // Extraer componentes R,G,B del color inicial (x0) a registros temporales x8, x9, x10.
+    lsr x8, x0, #16            // R_inicial 
 
-    // Franja 1 - Color: #3FCDCF
-    movz x0, 0x3F, lsl #16
-    movk x0, 0xCDCF, lsl #0
-    mov x1, 0
-    mov x2, 8
-    mov x3, 640
-    mov x4, 16
-    bl draw_rectangle
+    lsr x9, x0, #8            
+    and x9, x9, #0xFF          // Ahora tengo que hacer un filtro que me deje los ultimos 8 bits. Uso un and bit a bit como un filtro. Finalmente, G_inicial
 
-    // Franja 2 - Color: #3DC9D0
-    movz x0, 0x3D, lsl #16
-    movk x0, 0xC9D0, lsl #0
-    mov x1, 0
-    mov x2, 16
-    mov x3, 640
-    mov x4, 24
-    bl draw_rectangle
+    and x10, x0, #0xFF         // B_inicial
 
-    // Franja 3 - Color: #3CC6D0
-    movz x0, 0x3C, lsl #16
-    movk x0, 0xC6D0, lsl #0
-    mov x1, 0
-    mov x2, 24
-    mov x3, 640
-    mov x4, 32
-    bl draw_rectangle
+    // Extraer componentes R,G,B del color final (x1) a registros temporales x11, x12, x13.
+    lsr x11, x1, #16           // R_final
 
-    // Franja 4 - Color: #3AC2D0
-    movz x0, 0x3A, lsl #16
-    movk x0, 0xC2D0, lsl #0
-    mov x1, 0
-    mov x2, 32
-    mov x3, 640
-    mov x4, 40
-    bl draw_rectangle
+    lsr x12, x1, #8            
+    and x12, x12, #0xFF        // G_final 
 
-    // Franja 5 - Color: #39BFD0
-    movz x0, 0x39, lsl #16
-    movk x0, 0xBFD0, lsl #0
-    mov x1, 0
-    mov x2, 40
-    mov x3, 640
-    mov x4, 48
-    bl draw_rectangle
+    and x13, x1, #0xFF         // B_final
 
-    // Franja 6 - Color: #38BCD1
-    movz x0, 0x38, lsl #16
-    movk x0, 0xBCD1, lsl #0
-    mov x1, 0
-    mov x2, 48
-    mov x3, 640
-    mov x4, 56
-    bl draw_rectangle
+    // Calculo los delta de R,G,B. Es decir, delta(R) = R_final - R_inicial, delta(G) = G_final - G_inicial, delta(B) = B_final - B_inicial
+    sub x14, x11, x8
+    sub x15, x12, x9
+    sub x16, x13, x10
 
-    // Franja 7 - Color: #36B8D1
-    movz x0, 0x36, lsl #16
-    movk x0, 0xB8D1, lsl #0
-    mov x1, 0
-    mov x2, 56
-    mov x3, 640
-    mov x4, 64
-    bl draw_rectangle
+    // x2 es el contador de y, voy a iterar 260 veces porque el degradad llega hasta un poquito más de la mitad de la pantalla
+    mov x2, #0
+._loop_y:
+    cmp x2, SCREEN_HEIGH
+    b.ge ._background_done
 
-    // Franja 8 - Color: #35B5D1
-    movz x0, 0x35, lsl #16
-    movk x0, 0xB5D1, lsl #0
-    mov x1, 0
-    mov x2, 64
-    mov x3, 640
-    mov x4, 72
-    bl draw_rectangle
+    mov x3, SCREEN_WIDTH
 
-    // Franja 9 - Color: #34B2D1
-    movz x0, 0x34, lsl #16
-    movk x0, 0xB2D1, lsl #0
-    mov x1, 0
-    mov x2, 72
-    mov x3, 640
-    mov x4, 80
-    bl draw_rectangle
+    cmp x2, #260
+    b.ge ._gradient_done
 
-    // Franja 10 - Color: #32AED2
-    movz x0, 0x32, lsl #16
-    movk x0, 0xAED2, lsl #0
-    mov x1, 0
-    mov x2, 80
-    mov x3, 640
-    mov x4, 88
-    bl draw_rectangle
+    // Calculo el color interpolado.
 
-    // Franja 11 - Color: #31ABD2
-    movz x0, 0x31, lsl #16
-    movk x0, 0xABD2, lsl #0
-    mov x1, 0
-    mov x2, 88
-    mov x3, 640
-    mov x4, 96
-    bl draw_rectangle
+    // Calculo el porcentaje de avance para la fila actual.
+    // porcentaje = (fila actual * 255) / 260
+    mov x19, #255
+    mov x20, #260
+    mul x4, x2, x19
+    udiv x4, x4, x20
 
-    // Franja 12 - Color: #2FA7D2
-    movz x0, 0x2F, lsl #16
-    movk x0, 0xA7D2, lsl #0
-    mov x1, 0
-    mov x2, 96
-    mov x3, 640
-    mov x4, 104
-    bl draw_rectangle
+    // Interpolación lineal para el componente R.
+    // R_actual: R_incial + ((delta(R) * porcentaje) / 255)
+    mul x5,  x14, x4
+    udiv x5, x5, x19
+    add x5, x8, x5
 
-    // Franja 13 - Color: #2EA4D3
-    movz x0, 0x2E, lsl #16
-    movk x0, 0xA4D3, lsl #0
-    mov x1, 0
-    mov x2, 104
-    mov x3, 640
-    mov x4, 112
-    bl draw_rectangle
+    // Interpolación lineal para el componente G.
+    // G_actual: G_incial + ((delta(G) * porcentaje) / 255)
+    mul x6,  x15, x4
+    udiv x6, x6, x19
+    add x6, x9, x6
+    
+    // Interpolación lineal para el componente R.
+    // R_actual: R_incial + ((delta(R) * porcentaje) / 255)
+    mul x7,  x16, x4
+    udiv x7, x7, x19
+    add x7, x10, x7
 
-    // Franja 14 - Color: #2DA1D3
-    movz x0, 0x2D, lsl #16
-    movk x0, 0xA1D3, lsl #0
-    mov x1, 0
-    mov x2, 112
-    mov x3, 640
-    mov x4, 120
-    bl draw_rectangle
+    // Conformo el color
+    lsl x5, x5, #16
+    mov x21, x5
 
-    // Franja 15 - Color: #2B9DD3
-    movz x0, 0x2B, lsl #16
-    movk x0, 0x9DD3, lsl #0
-    mov x1, 0
-    mov x2, 120
-    mov x3, 640
-    mov x4, 128
-    bl draw_rectangle
+    lsl x6, x6, #8
+    orr x21, x21, x6
 
-    // Franja 16 - Color: #2A9AD3
-    movz x0, 0x2A, lsl #16
-    movk x0, 0x9AD3, lsl #0
-    mov x1, 0
-    mov x2, 128
-    mov x3, 640
-    mov x4, 136
-    bl draw_rectangle
+    orr x21,x21, x7
 
-    // Franja 17 - Color: #2997D4
-    movz x0, 0x29, lsl #16
-    movk x0, 0x97D4, lsl #0
-    mov x1, 0
-    mov x2, 136
-    mov x3, 640
-    mov x4, 144
-    bl draw_rectangle
+    b ._loop_x
 
-    // Franja 18 - Color: #2793D4
-    movz x0, 0x27, lsl #16
-    movk x0, 0x93D4, lsl #0
-    mov x1, 0
-    mov x2, 144
-    mov x3, 640
-    mov x4, 152
-    bl draw_rectangle
+._gradient_done:
+    mov x21, x1
 
-    // Franja 19 - Color: #2690D4
-    movz x0, 0x26, lsl #16
-    movk x0, 0x90D4, lsl #0
-    mov x1, 0
-    mov x2, 152
-    mov x3, 640
-    mov x4, 160
-    bl draw_rectangle
+._loop_x:
+    str w21, [x28]
+    add x28, x28, #4
+    sub x3, x3, #1
+    cbnz x3, ._loop_x
 
-    // Franja 20 - Color: #248CD5
-    movz x0, 0x24, lsl #16
-    movk x0, 0x8CD5, lsl #0
-    mov x1, 0
-    mov x2, 160
-    mov x3, 640
-    mov x4, 168
-    bl draw_rectangle
+    add x2, x2, #1
+    b ._loop_y
 
-    // Franja 21 - Color: #2389D5
-    movz x0, 0x23, lsl #16
-    movk x0, 0x89D5, lsl #0
-    mov x1, 0
-    mov x2, 168
-    mov x3, 640
-    mov x4, 176
-    bl draw_rectangle
-
-    // Franja 22 - Color: #2286D5
-    movz x0, 0x22, lsl #16
-    movk x0, 0x86D5, lsl #0
-    mov x1, 0
-    mov x2, 176
-    mov x3, 640
-    mov x4, 184
-    bl draw_rectangle
-
-    // Franja 23 - Color: #2082D5
-    movz x0, 0x20, lsl #16
-    movk x0, 0x82D5, lsl #0
-    mov x1, 0
-    mov x2, 184
-    mov x3, 640
-    mov x4, 192
-    bl draw_rectangle
-
-    // Franja 24 - Color: #1F7FD6
-    movz x0, 0x1F, lsl #16
-    movk x0, 0x7FD6, lsl #0
-    mov x1, 0
-    mov x2, 192
-    mov x3, 640
-    mov x4, 200
-    bl draw_rectangle
-
-    // Franja 25 - Color: #1E7CD6
-    movz x0, 0x1E, lsl #16
-    movk x0, 0x7CD6, lsl #0
-    mov x1, 0
-    mov x2, 200
-    mov x3, 640
-    mov x4, 208
-    bl draw_rectangle
-
-    // Franja 26 - Color: #1C78D6
-    movz x0, 0x1C, lsl #16
-    movk x0, 0x78D6, lsl #0
-    mov x1, 0
-    mov x2, 208
-    mov x3, 640
-    mov x4, 216
-    bl draw_rectangle
-
-    // Franja 27 - Color: #1B75D6
-    movz x0, 0x1B, lsl #16
-    movk x0, 0x75D6, lsl #0
-    mov x1, 0
-    mov x2, 216
-    mov x3, 640
-    mov x4, 224
-    bl draw_rectangle
-
-    // Franja 28 - Color: #1971D7
-    movz x0, 0x19, lsl #16
-    movk x0, 0x71D7, lsl #0
-    mov x1, 0
-    mov x2, 224
-    mov x3, 640
-    mov x4, 232
-    bl draw_rectangle
-
-    // Franja 29 - Color: #186ED7
-    movz x0, 0x18, lsl #16
-    movk x0, 0x6ED7, lsl #0
-    mov x1, 0
-    mov x2, 232
-    mov x3, 640
-    mov x4, 480
-    bl draw_rectangle
-
-
-
-
-    ldr x30, [sp], 8
+._background_done:
+    // Restauro registros callee-saved
+    ldr x30, [sp], #8
+    ldp x21, x28, [sp], #16
+    ldp x19, x20, [sp], #16
+    
     ret
+
+
+
 
 
 /**
@@ -310,7 +157,7 @@ draw_sand:
     mov x4, #480
     bl draw_rectangle
 ._draw_sand_details:
-    // Añado piedritas para cambiarlo un poco y que no sea una franja de un color
+    // Añado piedritas para cambiarlo un poco y que no sea una franja de color.
     // No es lo más elegante del mundo. Se podría hacer una función que haga un patrón de piedritas. TODO
     mov x1, #5
     mov x2, #345
@@ -893,6 +740,7 @@ draw_edificios_fondo:
     movz x0, 0x2F, lsl #16
 	movk x0, 0x3C9A, lsl #00
 
+    // 1
     mov x1, #176
     mov x2, #293
     mov x3, #188
@@ -916,6 +764,41 @@ draw_edificios_fondo:
     mov x3, #183
     mov x4, #292
     bl draw_rectangle
+
+    // 2
+    mov x1, #176
+    mov x2, #293
+    mov x3, #188
+    mov x4, #335
+    bl draw_rectangle
+
+    mov x1, #189
+    mov x2, #312
+    mov x3, #193
+    mov x4, #321
+    bl draw_rectangle
+
+    mov x1, #172
+    mov x2, #305
+    mov x3, #175
+    mov x4, #316
+    bl draw_rectangle
+
+    mov x1, #180
+    mov x2, #285
+    mov x3, #183
+    mov x4, #292
+    bl draw_rectangle
+
+    // 3
+
+    // 4
+
+
+    // detalles
+
+
+
 
     ldr x30, [sp], #8
     ret
