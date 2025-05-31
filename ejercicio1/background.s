@@ -4,6 +4,7 @@
 .globl draw_sand
 .globl draw_road
 .globl draw_edificios_fondo
+.globl draw_casa_bob_esponja
 
 /**
  * Function: background_gradient
@@ -145,7 +146,7 @@ background_gradient:
 draw_sand:
     str x30, [sp, #-8]!
 
-    // color de la arena = 0xD0D097
+    // Color de la arena = #D0D097 (elegir bien)
     // CBCA8A
     // ece2c6
     // 0xCFCF8F
@@ -503,15 +504,15 @@ draw_pebble:
     mov x11, x2
     
 
-    // Color de la piedrita = 0xA4AB82
+    // Color de la piedrita = #A4AB82
     movz x20, 0xa4, lsl #16
     movk x20, 0xab82, lsl #00
 
-    // Color más claro = 0x00B8BF96
+    // Color más claro = #B8BF96
     movz x21, 0xb8, lsl #16
     movk x21, 0xbf96, lsl #00
 
-    // Color más oscuro
+    // Color más oscuro = #90976E
     movz x22, 0x90, lsl #16
     movk x22, 0x976e, lsl #00
 
@@ -586,9 +587,9 @@ draw_road:
     str x30, [sp, #-8]!
     
 
-    // color de la ruta: 0x334750
-    movz x0, 0x33, lsl #16
-	movk x0, 0x4750, lsl #00
+    // Color de la ruta: #3B4F42
+    movz x0, 0x3B, lsl #16
+	movk x0, 0x4F42, lsl #00
 
     mov x1, #0
     mov x2, #455
@@ -610,7 +611,7 @@ draw_road:
 
 
 
-    // color del cordón de la ruta: 0x203A37
+    // Color del cordón de la ruta: #203A37
     movz x0, 0x20, lsl #16
 	movk x0, 0x3A37, lsl #00
 
@@ -736,33 +737,39 @@ draw_road:
 draw_edificios_fondo:
     str x30, [sp, #-8]!
     
-    // color de los edificios del fondo: 0x2F3C9A
+    // Color de los edificios del fondo: #2F3C9A
     movz x0, 0x2F, lsl #16
 	movk x0, 0x3C9A, lsl #00
 
     // 1
-    mov x1, #176
-    mov x2, #293
-    mov x3, #188
+    mov x1, #18
+    mov x2, #316
+    mov x3, #31
     mov x4, #335
     bl draw_rectangle
 
-    mov x1, #189
-    mov x2, #312
-    mov x3, #193
-    mov x4, #321
+    mov x1, #15
+    mov x2, #301
+    mov x3, #31
+    mov x4, #315
     bl draw_rectangle
 
-    mov x1, #172
-    mov x2, #305
-    mov x3, #175
-    mov x4, #316
+    mov x1, #32
+    mov x2, #299
+    mov x3, #35
+    mov x4, #314
     bl draw_rectangle
 
-    mov x1, #180
-    mov x2, #285
-    mov x3, #183
-    mov x4, #292
+    mov x1, #19
+    mov x2, #295
+    mov x3, #31
+    mov x4, #300
+    bl draw_rectangle
+
+    mov x1, #24
+    mov x2, #288
+    mov x3, #27
+    mov x4, #294
     bl draw_rectangle
 
     // 2
@@ -791,13 +798,55 @@ draw_edificios_fondo:
     bl draw_rectangle
 
     // 3
+    mov x1, #418
+    mov x2, #303
+    mov x3, #421
+    mov x4, #335
+    bl draw_rectangle
+
+    mov x1, #414
+    mov x2, #312
+    mov x3, #417
+    mov x4, #326
+    bl draw_rectangle
+
+    mov x1, #422
+    mov x2, #311
+    mov x3, #426
+    mov x4, #335
+    bl draw_rectangle
+
 
     // 4
+    mov x1, #609
+    mov x2, #306
+    mov x3, #621
+    mov x4, #335
+    bl draw_rectangle
 
+    mov x1, #622
+    mov x2, #306
+    mov x3, #625
+    mov x4, #318
+    bl draw_rectangle
+    
+    mov x1, #604
+    mov x2, #321
+    mov x3, #608
+    mov x4, #326
+    bl draw_rectangle
 
-    // detalles
+    mov x1, #613
+    mov x2, #297
+    mov x3, #617
+    mov x4, #305
+    bl draw_rectangle
 
-
+    mov x1, #617
+    mov x2, #291
+    mov x3, #621
+    mov x4, #301
+    bl draw_rectangle
 
 
     ldr x30, [sp], #8
