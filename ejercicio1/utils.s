@@ -6,6 +6,7 @@
     .globl draw_semi_circle
     .globl draw_circle
     .globl draw_fill_circle
+    .globl draw_parallelogram
     .globl abs
     
 
@@ -369,73 +370,6 @@ draw_fill_circle:
     ret
 
 
-
-/*  Function: draw_parallelogram.
-   Description: Dibuja un paralelogramo tomando como vertices (x0,y0), (x1,y1) y (x2,y2), calculando el restante
-                y dibujando las aristas con draw_line.
-   Inputs: x1, x2  = coordenadas (X0,Y0) del primer vertice.
-           x3, x4  = coordenadas (X1,Y1) del segundo vertice.
-           x6, x7  = coordenadas (X2,Y2) del tercer vertice.
-           x0, x11, x12, x13 ,x14 = color de las lineas. (=====CONSULTAR=====)
-   Outputs: None.
-   Temporales: x9, x10 =  coordenadas (X3,Y3) del tercer vertice.
-*/
-draw_parallelogram:
-   sub sp, sp, #16
-   stur lr, [sp]
-
-
-   // Calcular coordenada X del cuarto vertice. X3 = X0 + (X2 - X1).
-   sub x9, x6, x3
-   add x9, x1, x9
-
-
-   // Calcular coordenada Y del cuarto vertice. Y3 = Y0 + (Y2 - Y1).
-   sub x10, x7, x4
-   add x10, x10, x2
-
-
-   // Primer arista. P1 -> P2
-   mov x1, x1
-   mov x2, x2
-   mov x3, x3
-   mov x4, x4
-   mov x0, x11     // x11 Contiene el color de la arista a dibujar.
-   bl draw_line
-
-
-   // Seguna arista. P2 -> P3
-   mov x1, x3
-   mov x2, x4
-   mov x3, x6
-   mov x4, x7
-   mov x0, x12
-   bl draw_line
-
-
-   // Tercera arista. P3 -> P4
-   mov x1, x6
-   mov x2, x7
-   mov x3, x15
-   mov x4, x9
-   mov x0, x13
-   bl draw_line
-
-
-   // Cuarta arista. P4 -> P1
-   mov x1, x15
-   mov x2, x9
-   mov x3, x1
-   mov x4, x2
-   mov x0, x14
-   bl draw_line
-
-
-   ldur lr, [sp]
-   add sp, sp, #16
-   ret
-
-
 draw_rectangle:
     // Guardar registros en la pila
     sub sp, sp, #64         // Reservar espacio para variables locales y registros
@@ -649,6 +583,219 @@ draw_semi_circle:
     add sp, sp, #64
     ret
 
+
+// Function: draw_parallelogram
+// Description: Dibuja un paralelogramo relleno en la pantalla, definido por un punto de inicio y dos vectores.
+// Inputs:
+//  - x0: color
+//  - x1: x0 (coordenada x del punto de inicio)  
+//  - x2: y0 (coordenada y del punto de inicio)
+//  - x3: ux (componente x del primer vector)    
+//  - x4: uy (componente y del primer vector)
+//  - x5: vx (componente x del segundo vector)   
+//  - x6: vy (componente y del segundo vector)
+// 
+//  Los puntos x0 e y0 son el punto inicial, llamemoslo A. 
+//  El vector u (ux, uy) define el primer lado desde el punto A hasta el punto B.
+//  El vector v (vx, vy) define el segundo lado desde el punto A hasta el punto D
+//
+// Outputs: ninguno
+// Registros modificados: ninguno aparte de los temporales
+
+draw_parallelogram:
+    // Guardar registros en la pila
+    sub sp, sp, #128        // Reservar 128 bytes: 16 para x29/x30, 80 para parametros, 32 para temporales
+    stp x29, x30, [sp, #0]  // Guardar FP y LR
+    add x29, sp, #0         // Set FP
+    str x0, [x29, #16]      // Guardar color
+    str x1, [x29, #24]      // Guardar x0
+    str x2, [x29, #32]      // Guardar y0
+    str x3, [x29, #40]      // Guardar ux
+    str x4, [x29, #48]      // Guardar uy
+    str x5, [x29, #56]      // Guardar vx
+    str x6, [x29, #64]      // Guardar vy
+
+    // Calcular los vertices del paralelogramo
+    // A = (x0, y0)
+    ldr x1, [x29, #24]      // x_A = x0
+    ldr x2, [x29, #32]      // y_A = y0
+    str x1, [x29, #80]      // Guardar x_A
+    str x2, [x29, #88]      // Guardar y_A
+
+    // B = (x0 + ux, y0 + uy)
+    ldr x9, [x29, #40]      // x9 = ux
+    ldr x10, [x29, #48]     // x10 = uy
+    add x3, x1, x9          // x_B = x0 + ux
+    add x4, x2, x10         // y_B = y0 + uy
+    str x3, [x29, #96]      // Guardar x_B
+    str x4, [x29, #104]     // Guardar y_B
+
+    // C = (x0 + ux + vx, y0 + uy + vy)
+    ldr x11, [x29, #56]     // x11 = vx
+    ldr x12, [x29, #64]     // x12 = vy
+    add x3, x3, x11         // x_C = x_B + vx
+    add x4, x4, x12         // y_C = y_B + vy
+    str x3, [x29, #112]     // Guardar x_C
+    str x4, [x29, #120]     // Guardar y_C
+
+    // D = (x0 + vx, y0 + vy)
+    add x3, x1, x11         // x_D = x0 + vx
+    add x4, x2, x12         // y_D = y0 + vy
+
+    // Encontrar y_min y y_max
+    ldr x2, [x29, #88]      // y_A
+    ldr x4, [x29, #104]     // y_B
+    ldr x10, [x29, #120]    // y_C
+    mov x19, x2             // y_min = y_A
+    mov x20, x2             // y_max = y_A
+
+    cmp x4, x19             // Comparar y_B con y_min
+    csel x19, x4, x19, lt   // y_min = min(y_B, y_min)
+    cmp x4, x20             // Comparar y_B con y_max
+    csel x20, x4, x20, gt   // y_max = max(y_B, y_max)
+
+    cmp x10, x19            // Comparar y_C con y_min
+    csel x19, x10, x19, lt  // y_min = min(y_C, y_min)
+    cmp x10, x20            // Comparar y_C con y_max
+    csel x20, x10, x20, gt  // y_max = max(y_C, y_max)
+
+    add x3, x1, x11         // y_D = y0 + vy
+    cmp x3, x19             // Comparar y_D con y_min
+    csel x19, x3, x19, lt   // y_min = min(y_D, y_min)
+    cmp x3, x20             // Comparar y_D con y_max
+    csel x20, x3, x20, gt   // y_max = max(y_D, y_max)
+
+    // Bucle para cada y en [y_min, y_max]
+    mov x21, x19            // y_current = y_min
+._fill_loop:
+    cmp x21, x20            // Comparar y_current con y_max
+    b.gt ._end_fill_loop    // Si y_current > y_max, salir
+
+    // Encontrar intersecciones de la linea y = y_current con los lados
+    // Almacenar x_min y x_max para la línea horizontal
+    mov x22, #0x7FFFFFFF    // x_min = max_int
+    mov x23, #-0x80000000   // x_max = min_int
+
+    // Verificar interseccion con lado A-B: (x_A, y_A) a (x_B, y_B)
+    ldr x1, [x29, #80]      // x_A
+    ldr x2, [x29, #88]      // y_A
+    ldr x3, [x29, #96]      // x_B
+    ldr x4, [x29, #104]     // y_B
+    bl ._check_intersection
+    cbz x0, ._skip_ab       // Si no hay interseccion, saltar
+    cmp x9, x22             // Comparar x_inter con x_min
+    csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
+    cmp x9, x23             // Comparar x_inter con x_max
+    csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
+._skip_ab:
+
+    // Verificar interseccion con lado B-C: (x_B, y_B) a (x_C, y_C)
+    ldr x1, [x29, #96]      // x_B
+    ldr x2, [x29, #104]     // y_B
+    ldr x3, [x29, #112]     // x_C
+    ldr x4, [x29, #120]     // y_C
+    bl ._check_intersection
+    cbz x0, ._skip_bc       // Si no hay interseccion, saltar
+    cmp x9, x22             // Comparar x_inter con x_min
+    csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
+    cmp x9, x23             // Comparar x_inter con x_max
+    csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
+._skip_bc:
+
+    // Verificar interseccion con lado C-D: (x_C, y_C) a (x_D, y_D)
+    ldr x1, [x29, #112]     // x_C
+    ldr x2, [x29, #120]     // y_C
+    ldr x3, [x29, #80]      // x_D = x0 + vx
+    ldr x4, [x29, #32]      // y_D = y0 + vy
+    ldr x10, [x29, #56]     // vx
+    ldr x11, [x29, #64]     // vy
+    add x3, x3, x10         // x_D
+    add x4, x4, x11         // y_D
+    bl ._check_intersection
+    cbz x0, ._skip_cd       // Si no hay interseccion, saltar
+    cmp x9, x22             // Comparar x_inter con x_min
+    csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
+    cmp x9, x23             // Comparar x_inter con x_max
+    csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
+._skip_cd:
+
+    // Verificar interseccion con lado D-A: (x_D, y_D) a (x_A, y_A)
+    ldr x1, [x29, #80]      // x_D = x0 + vx
+    ldr x2, [x29, #32]      // y_D = y0 + vy
+    ldr x10, [x29, #56]     // vx
+    ldr x11, [x29, #64]     // vy
+    add x1, x1, x10         // x_D
+    add x2, x2, x11         // y_D
+    ldr x3, [x29, #80]      // x_A
+    ldr x4, [x29, #88]      // y_A
+    bl ._check_intersection
+    cbz x0, ._skip_da       // Si no hay interseccion, saltar
+    cmp x9, x22             // Comparar x_inter con x_min
+    csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
+    cmp x9, x23             // Comparar x_inter con x_max
+    csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
+._skip_da:
+
+    // Dibujar linea horizontal desde x_min hasta x_max en y_current
+    ldr x0, [x29, #16]      // color
+    mov x1, x22             // x_0 = x_min
+    mov x2, x21             // y_0 = y_current
+    mov x3, x23             // x_1 = x_max
+    mov x4, x21             // y_1 = y_current
+    bl draw_line
+
+    // Incrementar y_current
+    add x21, x21, #1
+    b ._fill_loop
+
+._end_fill_loop:
+    // Restaurar registros y pila
+    ldp x29, x30, [sp, #0]  // Restaurar FP y LR
+    add sp, sp, #128        // Liberar espacio en la pila
+    ret
+
+// Subrutina auxiliar: check_intersection
+// Description: Calcula la interseccion de la linea y = y_current con el segmento de (x1, y1) a (x3, y4)
+// Inputs:
+//  - x1, x2: coordenadas (x, y) del primer punto
+//  - x3, x4: coordenadas (x, y) del segundo punto
+//  - x21: y_current
+// Outputs:
+//  - x0: 1 si hay interseccion, 0 si no
+//  - x9: x_inter (coordenada x de la interseccion, si existe)
+// Registros usados: x10, x11, x12, x13
+._check_intersection:
+    // Guardar LR
+    str x30, [sp, #-16]!
+
+    // Verificar si la linea horizontal esta dentro del rango y del segmento
+    mov x10, x2                 // y1
+    mov x11, x4                 // y2
+    cmp x10, x11
+    csel x12, x10, x11, le      // x12 = min(y1, y2)
+    csel x13, x10, x11, gt      // x13 = max(y1, y2)
+    cmp x21, x12
+    b.lt ._no_intersection      // y_current < min(y1, y2)
+    cmp x21, x13
+    b.gt ._no_intersection      // y_current > max(y1, y2)
+
+    // Calcular x_inter = x1 + (y_current - y1) * (x2 - x1) / (y2 - y1)
+    sub x12, x4, x2             // dy = y2 - y1
+    cbz x12, ._no_intersection // Evitar division por cero
+    sub x13, x21, x2            // y_current - y1
+    sub x10, x3, x1             // dx = x2 - x1
+    mul x13, x13, x10           // (y_current - y1) * (x2 - x1)
+    sdiv x13, x13, x12          // (y_current - y1) * (x2 - x1) / (y2 - y1)
+    add x9, x1, x13             // x_inter = x1 + resultado
+    mov x0, #1                  // Indicar interseccin valida
+    b ._end_intersection
+
+._no_intersection:
+    mov x0, #0              // No hay interseccion
+
+._end_intersection:
+    ldr x30, [sp], #16      // Restaurar LR
+    ret
 
 // ============================== Funciones matemáticas ========================
     // Function: abs

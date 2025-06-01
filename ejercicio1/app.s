@@ -22,11 +22,22 @@ main:
 	bl draw_line
 
 	//bl background_gradient
-	bl draw_sand
-	bl draw_road
-	bl draw_edificios_fondo
-	bl draw_flower
+	//bl draw_sand
+	//bl draw_road
+	//bl draw_edificios_fondo
+	//bl draw_flower
 	
+
+	// Dibuja un paralelogramo 
+	movz x0, 0x00CE, lsl 16  // Color
+	movk x0, 0x18B8, lsl 0
+	mov x1, #200             // x0: coordenada x inicial (centro aproximado)
+	mov x2, #150             // y0: coordenada y inicial (centro aproximado)
+	mov x3, #200             // ux: vector u 
+	mov x4, #0               // uy
+	mov x5, #50              // vx: vector v 
+	mov x6, #100             // vy
+	bl draw_parallelogram
 
 	// Ejemplo de uso de gpios
 	mov x9, GPIO_BASE
