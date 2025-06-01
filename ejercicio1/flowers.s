@@ -2,6 +2,7 @@
 
 
 draw_flower:
+	str x30, [sp, #-8]!
 // Flor 1
 	// Centro de la flor
 	movz x0, 0x00A1, lsl 16 	// Color 
@@ -1390,4 +1391,7 @@ draw_flower:
 	mov x4, #1              	// Direccion
 	mov x5, #0					// Relleno
 	bl draw_semi_circle
-ret
+
+
+	ldr x30, [sp], #8
+	ret
