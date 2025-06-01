@@ -26,14 +26,7 @@ main:
 	bl draw_road
 	bl draw_edificios_fondo
 	bl draw_flower
-
-	movz x0, 0x0009, lsl 16 	// Color 
-	movk x0, 0x671A, lsl 0
-	mov x1, #450            	// x_center base 450
-	mov x2, #320            	// y_center base 120
-	mov x3, #20           		// Radio
-	mov x4, #0              	// Direccion
-	bl draw_semi_circle
+	
 
 	// Ejemplo de uso de gpios
 	mov x9, GPIO_BASE
