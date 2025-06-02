@@ -14,10 +14,12 @@ main:
 
 	bl draw_sand
 	bl draw_road
+	bl draw_odc_sign
 	bl draw_edificios_fondo
 
 
 	bl draw_casa_calamardo
+	bl draw_casa_patricio
 
 	
 

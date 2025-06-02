@@ -4,6 +4,7 @@
 .globl draw_sand
 .globl draw_road
 .globl draw_edificios_fondo
+.globl draw_odc_sign
 
 /**
  * Function: background_gradient
@@ -851,3 +852,258 @@ draw_edificios_fondo:
     ldr x30, [sp], #8
     ret
     
+draw_odc_sign:
+    str x30, [sp, #8]!
+
+    movz x0, 0xB4, lsl #16  // Color (palo): #B45716
+	movk x0, 0x5716, lsl #0
+    mov x1, #192
+    mov x2, #382
+    mov x3, #196
+    mov x4, #451
+    bl draw_rectangle
+
+    movz x0, 0xFF, lsl #16  // Color: #FFFFFF
+	movk x0, 0xFFFF, lsl #0
+    mov x3, #194
+    mov x4, #412
+    mov x5, #25
+    bl draw_fill_circle
+
+    movz x0, 0xCF, lsl #16  // Color (arena): #CFCF8F
+	movk x0, 0xCF8F, lsl #00
+    mov x3, #194
+    mov x4, #412
+    mov x5, #10
+    bl draw_fill_circle
+
+    movz x0, 0xB4, lsl #16  // Color (palo): #B45716
+	movk x0, 0x5716, lsl #0
+    mov x1, #192
+    mov x2, #402
+    mov x3, #196
+    mov x4, #422
+    bl draw_rectangle
+
+    movz x0, 0xFF, lsl #16  // Color (rojo): #FF0000
+    mov x1, #173
+    mov x2, #398
+    mov x3, #6
+    mov x4, #-6
+    mov x5, #11
+    mov x6, #10
+    bl draw_parallelogram
+
+    mov x1, #210
+    mov x2, #393
+    mov x3, #5
+    mov x4, #5
+    mov x5, #-10
+    mov x6, #10
+    bl draw_parallelogram
+
+    mov x1, #184
+    mov x2, #416
+    mov x3, #4
+    mov x4, #5
+    mov x5, #-10
+    mov x6, #11
+    bl draw_parallelogram
+
+    mov x1, #204
+    mov x2, #416
+    mov x3, #-4
+    mov x4, #5
+    mov x5, #11
+    mov x6, #10
+    bl draw_parallelogram
+
+    // letras
+    // O
+    movz x0, 0x00, lsl #16  // Color (palo): #000000
+	movk x0, 0x0000, lsl #0
+    mov x1, #177
+    mov x2, #396
+    mov x3, #179
+    mov x4, #404
+    bl draw_rectangle
+    mov x1, #178
+    mov x2, #404
+    mov x3, #184
+    mov x4, #405
+    bl draw_rectangle
+    mov x1, #178
+    mov x2, #395
+    mov x3, #184
+    mov x4, #396
+    bl draw_rectangle
+    mov x1, #183
+    mov x2, #396
+    mov x3, #185
+    mov x4, #404
+    bl draw_rectangle
+
+    // d
+    mov x1, #196
+    mov x2, #389
+    mov x3, #198
+    mov x4, #399
+    bl draw_rectangle
+    mov x1, #191
+    mov x2, #398
+    mov x3, #198
+    mov x4, #399
+    bl draw_rectangle
+    mov x1, #191
+    mov x2, #393
+    mov x3, #198
+    mov x4, #394
+    bl draw_rectangle
+    mov x1, #190
+    mov x2, #394
+    mov x3, #192
+    mov x4, #398
+    bl draw_rectangle
+
+    // C
+    mov x1, #203
+    mov x2, #396
+    mov x3, #205
+    mov x4, #404
+    bl draw_rectangle
+    mov x1, #204
+    mov x2, #404
+    mov x3, #210
+    mov x4, #405
+    bl draw_rectangle
+    mov x1, #204
+    mov x2, #395
+    mov x3, #210
+    mov x4, #396
+    bl draw_rectangle
+    mov x1, #210
+    mov x2, #396
+    mov x3, #211
+    mov x4, #397
+    bl draw_rectangle
+    mov x1, #210
+    mov x2, #403
+    mov x3, #211
+    mov x4, #404
+    bl draw_rectangle
+
+    // 2
+    mov x1, #177
+    mov x2, #419
+    mov x3, #178
+    mov x4, #420
+    bl draw_rectangle
+    mov x1, #178
+    mov x2, #418
+    mov x3, #182
+    mov x4, #419
+    bl draw_rectangle
+    mov x1, #182
+    mov x2, #419
+    mov x3, #183
+    mov x4, #420
+    bl draw_rectangle
+    mov x1, #177
+    mov x2, #427
+    mov x3, #183
+    mov x4, #428
+    bl draw_rectangle
+    mov x1, #182
+    mov x2, #419
+    mov x3, #1
+    mov x4, #0
+    mov x5, #-5
+    mov x6, #9
+    bl draw_parallelogram
+
+    // 0
+    mov x1, #186
+    mov x2, #425
+    mov x3, #187
+    mov x4, #433
+    bl draw_rectangle
+    mov x1, #187
+    mov x2, #424
+    mov x3, #191
+    mov x4, #425
+    bl draw_rectangle
+    mov x1, #191
+    mov x2, #425
+    mov x3, #192
+    mov x4, #433
+    bl draw_rectangle
+    mov x1, #187
+    mov x2, #433
+    mov x3, #191
+    mov x4, #434
+    bl draw_rectangle
+    mov x1, #191
+    mov x2, #425
+    mov x3, #187
+    mov x4, #433
+    bl draw_line
+
+    // 2 (segundo)
+    mov x1, #196
+    mov x2, #425
+    mov x3, #197
+    mov x4, #426
+    bl draw_rectangle
+    mov x1, #197
+    mov x2, #424
+    mov x3, #201
+    mov x4, #425
+    bl draw_rectangle
+    mov x1, #201
+    mov x2, #425
+    mov x3, #202
+    mov x4, #426
+    bl draw_rectangle
+    mov x1, #196
+    mov x2, #433
+    mov x3, #202
+    mov x4, #434
+    bl draw_rectangle
+    mov x1, #201
+    mov x2, #425
+    mov x3, #1
+    mov x4, #0
+    mov x5, #-5
+    mov x6, #9
+    bl draw_parallelogram
+
+    // 5
+    mov x1, #206
+    mov x2, #418
+    mov x3, #211
+    mov x4, #419
+    bl draw_rectangle
+    mov x1, #205
+    mov x2, #419
+    mov x3, #206
+    mov x4, #422
+    bl draw_rectangle
+    mov x1, #206
+    mov x2, #422
+    mov x3, #210
+    mov x4, #423
+    bl draw_rectangle
+    mov x1, #210
+    mov x2, #423
+    mov x3, #211
+    mov x4, #427
+    bl draw_rectangle
+    mov x1, #205
+    mov x2, #427
+    mov x3, #210
+    mov x4, #428
+    bl draw_rectangle
+
+    ldr x30, [sp], #8
+    ret
+

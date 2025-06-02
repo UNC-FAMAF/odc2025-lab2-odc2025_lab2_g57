@@ -1,6 +1,7 @@
 #include "constants.s"
 
 .globl draw_casa_calamardo
+.globl draw_casa_patricio
 
 draw_casa_calamardo:
     str x30, [sp, #-8]!
@@ -201,3 +202,73 @@ draw_casa_calamardo:
     ldr x30, [sp], #8
     ret
     
+draw_casa_patricio:
+    str x30, [sp, #-8]!
+
+    movz x0, 0x52, lsl #16  // Color: #522620 <- casa de patricio
+	movk x0, 0x2620, lsl #0
+    mov x3, #102
+    mov x4, #389
+    mov x5, #80
+    bl draw_fill_semi_circle
+
+    
+    movz x0, 0xF1, lsl #16  // Color: #F19803 <- antena
+	movk x0, 0x9803, lsl #0
+
+    mov x1, #100
+    mov x2, #279
+    mov x3, #104
+    mov x4, #308
+    bl draw_rectangle
+
+    mov x1, #80
+    mov x2, #279
+    mov x3, #139
+    mov x4, #283
+    bl draw_rectangle
+    
+    mov x1, #90
+    mov x2, #264
+    mov x3, #4
+    mov x4, #0
+    mov x5, #-10
+    mov x6, #15
+    bl draw_parallelogram
+
+    mov x1, #80
+    mov x2, #283
+    mov x3, #4
+    mov x4, #0
+    mov x5, #10
+    mov x6, #15
+    bl draw_parallelogram
+
+    mov x1, #105
+    mov x2, #264
+    mov x3, #4
+    mov x4, #0
+    mov x5, #10
+    mov x6, #34
+    bl draw_parallelogram
+
+    mov x1, #125
+    mov x2, #264
+    mov x3, #4
+    mov x4, #0
+    mov x5, #8
+    mov x6, #34
+    bl draw_parallelogram
+
+
+
+
+
+
+
+
+
+
+    ldr x30, [sp], #8
+    ret
+
