@@ -15,12 +15,12 @@
 
     // Function: draw_pixel
     // Description: Dibuja un píxel en la pantalla en la posición (x, y) con un color dado.
-    // Inputs:
+    // Inputs (no preservado):
     //  -x0: color
     //  -x1: coordenada x
     //  -x2: coordenada y
     // Outputs: ninguno
-    // Registros modificados por esta función:
+    // Registros modificados por esta función (no preservado):
     // - x15: dirección de la posición (x,y) calculada
 draw_pixel:
     // Dirección del pixel (x,y) = Dirección de inicio del framebuffer + 4 * [x + (y * 640)]
@@ -35,7 +35,7 @@ draw_pixel:
 
     // Function: draw_line
     // Description: Dibuja una línea en la pantalla dados sus extremos A = (x_0, y_0) y B = (x_1 ,y_1). 
-    // Implementamos el algoritmo de Bresenham. https://zingl.github.io/bresenham.html
+    //              Implementamos el algoritmo de Bresenham. https://zingl.github.io/bresenham.html
     // Inputs (no preservados):
     //  -x0: color
     //  -x1: coordenada x_0
@@ -659,7 +659,7 @@ draw_parallelogram:
     cmp x10, x20            // Comparar y_C con y_max
     csel x20, x10, x20, gt  // y_max = max(y_C, y_max)
 
-    add x3, x1, x11         // y_D = y0 + vy
+    add x3, x2, x12         // y_D = y0 + vy
     cmp x3, x19             // Comparar y_D con y_min
     csel x19, x3, x19, lt   // y_min = min(y_D, y_min)
     cmp x3, x20             // Comparar y_D con y_max

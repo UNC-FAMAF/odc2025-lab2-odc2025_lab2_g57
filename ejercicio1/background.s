@@ -4,15 +4,14 @@
 .globl draw_sand
 .globl draw_road
 .globl draw_edificios_fondo
-.globl draw_casa_bob_esponja
 
 /**
  * Function: background_gradient
  * Description: Pinta un fondo degrado vertical hasta más de la mitad de la pantalla. Luego, pinta lo restante con el color final.
  *              Se hace uso de interpolación lineal por porcentaje escalar.
  * Registros caller-saved (Es decir, no preservados. Responsabilidad del caller!):
- * - x0: color inicial
- * - x1: color final
+ * - x0: color inicial (input)
+ * - x1: color final   (input)
  * - x2: contador y
  * - x3: contador x
  * - x4: porcentaje de avance
