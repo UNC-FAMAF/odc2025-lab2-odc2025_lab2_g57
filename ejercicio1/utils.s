@@ -7,6 +7,7 @@
     .globl draw_circle
     .globl draw_fill_circle
     .globl draw_parallelogram
+    .globl draw_fill_semi_circle
     .globl abs
     
 
@@ -362,6 +363,112 @@ draw_fill_circle:
             b ._fill_circle_loop
 
     ._fill_circle_end:
+        ldr lr, [sp], #8
+        ldr x22, [sp], #8
+        ldr x21, [sp], #8
+        ldr x20, [sp], #8
+        ldr x19, [sp], #8
+    ret
+
+/*  Function: draw_fill_semi_circle.
+   Description: Dibuja un semicirculo relleno (orientado hacia arriba) dadas sus coordenadas del centro (x,y), un radio y un color. 
+                'Midpoint Circle Algorithm'
+   Inputs:  x3, x4 = xc, yc (coordenadas del centro del semicirculo)   
+            x0 = color del semicirculo
+            x5 = radio del semicirculo
+   Outputs: ninguno
+   Temporales: x9, x10 = x, y (coordenadas para dibujar) 
+               x11 = p (criterio de seleccion)  
+               x12, x13 (auxiliares)
+*/
+draw_fill_semi_circle:
+    str x19, [sp, #-8]!
+    str x20, [sp, #-8]!
+    str x21, [sp, #-8]!
+    str x22, [sp, #-8]!
+    str lr, [sp, #-8]!
+
+    mov x9, xzr                 // x=0
+    sub x10, xzr, x5            // y=-r
+    sub x11, xzr, x5            // p=-r
+
+    ._fill_semi_circle_loop:
+        sub x12, xzr, x10
+        cmp x9, x12
+        b.ge ._fill_semi_circle_end          // if x>=-y --> fin del loop (equivale a un while x<-y)
+
+        cmp x11, xzr
+        b.gt ._fill_semi_circle_if
+        b ._fill_semi_circle_else            // if p>0, else;
+
+        ._fill_semi_circle_if:
+            add x10, x10, #1
+            add x13, x9, x10
+            lsl x13, x13, #1
+            add x13, x13, #1
+            add x11, x11, x13           // p += 2*(x+y)+1
+            b ._fill_semi_circle_draw
+
+        ._fill_semi_circle_else:
+            lsl x13, x9, #1
+            add x13, x13, #1      
+            add x11, x11, x13           // p += 2*x+1
+            b ._fill_semi_circle_draw
+
+        ._fill_semi_circle_draw:
+
+            // pinto pixel en (xc+x, yc+y)
+            add x1, x3, x9
+            mov x19, x1
+            add x2, x4, x10
+            mov x20, x2
+            bl draw_pixel
+
+            // pinto pixel en (xc-x, yc+y)
+            sub x1, x3, x9
+            mov x21, x1
+            add x2, x4, x10
+            mov x22, x2
+            bl draw_pixel
+
+            // trazo una linea horizontal entre los puntos de la circunferencia con igual coordenada y
+            stp x3, x4, [sp, #-16]!
+            mov x1, x19   
+            mov x2, x20
+            mov x3, x21
+            mov x4, x22
+            bl draw_line
+            ldp x3, x4, [sp], #16
+
+
+            // pinto pixel en (xc+y, yc-x)
+            add x1, x3, x10
+            mov x19, x1
+            sub x2, x4, x9
+            mov x20, x2
+            bl draw_pixel
+
+            // pinto pixel en (xc-y, yc-x)
+            sub x1, x3, x10
+            mov x21, x1
+            sub x2, x4, x9
+            mov x22, x2
+            bl draw_pixel
+
+            // trazo una linea horizontal entre los puntos de la circunferencia con igual coordenada y
+            stp x3, x4, [sp, #-16]!
+            mov x1, x19   
+            mov x2, x20
+            mov x3, x21
+            mov x4, x22
+            bl draw_line
+            ldp x3, x4, [sp], #16
+
+
+            add x9, x9, #1          // x++
+            b ._fill_semi_circle_loop
+
+    ._fill_semi_circle_end:
         ldr lr, [sp], #8
         ldr x22, [sp], #8
         ldr x21, [sp], #8
