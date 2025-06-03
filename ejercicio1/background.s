@@ -586,7 +586,6 @@ draw_pebble:
 draw_road:
     str x30, [sp, #-8]!
     
-
     // Color de la ruta: #3B4F42
     movz x0, 0x3B, lsl #16
 	movk x0, 0x4F42, lsl #00
@@ -609,8 +608,6 @@ draw_road:
     mov x4, #455
     bl draw_rectangle
 
-
-
     // Color del cordón de la ruta: #203A37
     movz x0, 0x20, lsl #16
 	movk x0, 0x3A37, lsl #00
@@ -621,115 +618,120 @@ draw_road:
     mov x4, #450
     bl draw_rectangle
 
-    // diagonal derecha casa bob
-    mov x1, #516
-    mov x2, #441
-    mov x3, #519
-    mov x4, #446
-    bl draw_rectangle
+    // Camino Bob.
+    movz x0, 0x3B, lsl #16
+	movk x0, 0x4F42, lsl #00  
+    mov x1, #470
+    mov x2, #390
+    mov x3, #83
+    mov x4, #0
+    mov x5, #-38
+    mov x6, #60
+    bl draw_parallelogram
 
-    mov x1, #520
-    mov x2, #418
-    mov x3, #523
-    mov x4, #440
-    bl draw_rectangle
-
-    mov x1, #524
-    mov x2, #405
-    mov x3, #527
-    mov x4, #417
-    bl draw_rectangle
-
-    mov x1, #528
-    mov x2, #400
-    mov x3, #531
-    mov x4, #404
-    bl draw_rectangle
-    
     // recta larga
+    movz x0, 0x20, lsl #16
+	movk x0, 0x3A37, lsl #00
     mov x1, #101
     mov x2, #452
     mov x3, #431
     mov x4, #455
     bl draw_rectangle
 
-    // parte casa patricio hasta diagonal
-    
+    // Borde ruta parte izq. hasta el camino de patricio.
+    movz x0, 0x20, lsl #16
+	movk x0, 0x3A37, lsl #00
     mov x1, #0
     mov x2, #447
-    mov x3, #27
+    mov x3, #28
     mov x4, #450
     bl draw_rectangle
 
+    //camino casa patricio
+    movz x0, 0x3B, lsl #16
+	movk x0, 0x4F42, lsl #00    
+    mov  X1, #65          // Ax
+    mov  X2, #390         // Ay
+    mov  X3, #74          // ux
+    mov  X4, #0           // uy
+    mov  X5, #-37         // vx
+    mov  X6, #60          // vy
+    bl  draw_parallelogram
+
+    // Camino casa calamardo. #642f19
+    movz x0, #0x64, lsl 16
+    movk x0, #0x2f19, lsl 0
+    mov x1, #240
+    mov x2, #432
+    mov x3, #62
+    mov x4, #0
+    mov x5, #-15
+    mov x6, #13
+    bl draw_parallelogram
+
+    movz x0, #0x64, lsl 16
+    movk x0, #0x2f19, lsl 0
+    mov x1, #264
+    mov x2, #414
+    mov x3, #50
+    mov x4, #0
+    mov x5, #-10
+    mov x6, #10
+    bl draw_parallelogram    
+
+    movz x0, #0x64, lsl 16
+    movk x0, #0x2f19, lsl 0
+    mov x1, #288
+    mov x2, #396
+    mov x3, #40
+    mov x4, #0
+    mov x5, #-10
+    mov x6, #10
+    bl draw_parallelogram  
+
+    // Rocas en la arena.
+    movz x0, #0x18, lsl #16
+	movk x0, #0x2033, lsl #0
+	mov x3, #347        // (x3, x4) = coordenadas del centro
+	mov x4, #445
+	mov x5, #6          // x5 = radio
+	bl draw_fill_semi_circle
+
+	movz x0, #0x37, lsl #16
+	movk x0, #0x638A, lsl #0
+	mov x3, #352
+	mov x4, #447
+	mov x5, #4
+	bl draw_fill_semi_circle
+
+	movz x0, #0x1e, lsl #16
+	movk x0, #0x3253, lsl #0
+	mov x3, #208
+	mov x4, #425
+	mov x5, #6
+	bl draw_fill_semi_circle
+
+	movz x0, #0x37, lsl #16
+	movk x0, #0x638A, lsl #0
+	mov x3, #136
+	mov x4, #442
+	mov x5, #6
+	bl draw_fill_semi_circle
+
+	movz x0, #0x37, lsl #16
+	movk x0, #0x638A, lsl #0
+	mov x3, #567
+	mov x4, #437
+	mov x5, #6
+	bl draw_fill_semi_circle
+
+	movz x0, #0x1e, lsl #16
+	movk x0, #0x3253, lsl #0
+	mov x3, #561
+	mov x4, #439
+	mov x5, #4
+	bl draw_fill_semi_circle
     
-    mov x1, #432
-    mov x2, #447
-    mov x3, #440
-    mov x4, #450
-    bl draw_rectangle
-
-    mov x1, #441
-    mov x2, #441
-    mov x3, #444
-    mov x4, #446
-    bl draw_rectangle
-
-    mov x1, #445
-    mov x2, #433
-    mov x3, #448
-    mov x4, #440
-    bl draw_rectangle
-
-    mov x1, #449
-    mov x2, #428
-    mov x3, #452
-    mov x4, #432
-    bl draw_rectangle
-    
-    mov x1, #453
-    mov x2, #423
-    mov x3, #456
-    mov x4, #427
-    bl draw_rectangle
-
-    mov x1, #457
-    mov x2, #419
-    mov x3, #461
-    mov x4, #422
-    bl draw_rectangle
-
-
-    mov x1, #462
-    mov x2, #413
-    mov x3, #465
-    mov x4, #418
-    bl draw_rectangle
-
-    mov x1, #466
-    mov x2, #409
-    mov x3, #469
-    mov x4, #412
-    bl draw_rectangle
-
-    mov x1, #470
-    mov x2, #404
-    mov x3, #477
-    mov x4, #408
-    bl draw_rectangle
-
-    mov x1, #478
-    mov x2, #400
-    mov x3, #482
-    mov x4, #403
-    bl draw_rectangle
-    
-    
-
-
-    
-
-    
-   
     ldr x30, [sp], #8
     ret
 
