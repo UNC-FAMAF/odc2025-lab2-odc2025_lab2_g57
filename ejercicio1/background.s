@@ -648,12 +648,23 @@ draw_road:
     mov x6, #61
     bl draw_parallelogram
 
+
     // Camino Bob.
+    movz x0, 0x20, lsl #16
+	movk x0, 0x3A37, lsl #00
+    mov x1, #487
+    mov x2, #390
+    mov x3, #75
+    mov x4, #0
+    mov x5, #-38
+    mov x6, #60
+    bl draw_parallelogram
+
     movz x0, 0x3B, lsl #16
 	movk x0, 0x4F42, lsl #00  
-    mov x1, #470
+    mov x1, #490
     mov x2, #390
-    mov x3, #83
+    mov x3, #70
     mov x4, #0
     mov x5, #-38
     mov x6, #60
