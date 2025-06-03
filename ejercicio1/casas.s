@@ -2,6 +2,7 @@
 
 .globl draw_casa_calamardo
 .globl draw_casa_patricio
+.globl draw_casa_bob
 
 draw_casa_calamardo:
     str x30, [sp, #-8]!
@@ -260,15 +261,135 @@ draw_casa_patricio:
     mov x6, #34
     bl draw_parallelogram
 
-
-
-
-
-
-
-
-
-
     ldr x30, [sp], #8
     ret
 
+
+
+draw_casa_bob:
+    str lr, [sp, #-8]!  
+
+    //CHIMENEA
+    movz x0, 0x10, lsl #16  // Color: #102653
+	movk x0, 0x2653, lsl #0
+    mov x1, #560 
+    mov x2, #250
+    mov x3, #605 
+    mov x4, #270
+    bl draw_rectangle
+    mov x1, #605 
+    mov x2, #270
+    mov x3, #0
+    mov x4, #-20
+    mov x5, #15
+    mov x6, #-20
+    bl draw_parallelogram
+    mov x1, #600     
+    mov x2, #220
+    mov x3, #620 
+    mov x4, #250
+    bl draw_rectangle
+    mov x1, #597     
+    mov x2, #210
+    mov x3, #623 
+    mov x4, #220
+    bl draw_rectangle
+
+
+    // ANANA
+    movz x0, 0xe0, lsl #16  // Color: #cf3c06 <- casa de bob
+	movk x0, 0x690e, lsl #0
+
+    mov x1, #470           // x0: coordenada x inicial
+	mov x2, #389           // y0: coordenada y inicial 
+	mov x3, #110           // ux: vector u 
+	mov x4, #0             // uy
+	mov x5, #-12           // vx: vector v 
+	mov x6, #-30            // vy
+	bl draw_parallelogram
+    //---------------------
+    mov x1, #580          // x0: coordenada x inicial
+	mov x2, #389           // y0: coordenada y inicial 
+	mov x3, #-40               // ux: vector u 
+	mov x4, #0             // uy
+	mov x5, #12          // vx: vector v 
+	mov x6, #-30           // vy
+	bl draw_parallelogram
+
+
+    mov x1, #458           // x0: coordenada x inicial
+	mov x2, #359           // y0: coordenada y inicial 
+	mov x3, #130           // ux: vector u 
+	mov x4, #0             // uy
+	mov x5, #-6           // vx: vector v 
+	mov x6, #-30            // vy
+	bl draw_parallelogram
+    //---------------------
+    mov x1, #551          // x0: coordenada x inicial
+	mov x2, #359           // y0: coordenada y inicial 
+	mov x3, #42             // ux: vector u 
+	mov x4, #0             // uy
+	mov x5, #6          // vx: vector v 
+	mov x6, #-30           // vy
+	bl draw_parallelogram
+
+
+    mov x1, #452           // x0: coordenada x inicial
+	mov x2, #329           // y0: coordenada y inicial 
+	mov x3, #130           // ux: vector u 
+	mov x4, #0             // uy
+	mov x5, #-2           // vx: vector v 
+	mov x6, #-30            // vy
+	bl draw_parallelogram
+    //---------------------
+    mov x1, #557          // x0: coordenada x inicial
+	mov x2, #329           // y0: coordenada y inicial 
+	mov x3, #42             // ux: vector u 
+	mov x4, #0             // uy
+	mov x5, #2          // vx: vector v 
+	mov x6, #-30           // vy
+	bl draw_parallelogram
+
+
+    mov x1, #450           // x0: coordenada x inicial
+	mov x2, #299           // y0: coordenada y inicial 
+	mov x3, #130           // ux: vector u 
+	mov x4, #0             // uy
+	mov x5, #3           // vx: vector v 
+	mov x6, #-30            // vy
+	bl draw_parallelogram
+    //---------------------
+    mov x1, #560          // x0: coordenada x inicial
+	mov x2, #299           // y0: coordenada y inicial 
+	mov x3, #40             // ux: vector u 
+	mov x4, #0             // uy
+	mov x5, #-3          // vx: vector v 
+	mov x6, #-30           // vy
+	bl draw_parallelogram
+
+
+    mov x1, #453           // x0: coordenada x inicial
+	mov x2, #269           // y0: coordenada y inicial
+	mov x3, #110           // ux: vector u 
+	mov x4, #0             // uy
+	mov x5, #9           // vx: vector v 
+	mov x6, #-30            // vy
+	bl draw_parallelogram
+    //---------------------
+    mov x1, #557          // x0: coordenada x inicial
+	mov x2, #269           // y0: coordenada y inicial 
+	mov x3, #40             // ux: vector u 
+	mov x4, #0             // uy
+	mov x5, #-9          // vx: vector v 
+	mov x6, #-30           // vy
+	bl draw_parallelogram
+
+    // Parte de arriba
+    mov x3, #525
+    mov x4, #265
+    mov x5, #68      
+    bl draw_fill_semi_circle
+
+
+    ldr lr, [sp], #8
+    ret
