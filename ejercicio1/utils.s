@@ -11,18 +11,17 @@
     .globl abs
     
 
-// ============================== Funciones de dibujo ===============================
-    // RECORDAR QUE X28 = dirección base del framebuffer
-
-    // Function: draw_pixel
-    // Description: Dibuja un píxel en la pantalla en la posición (x, y) con un color dado.
-    // Inputs (no preservado):
-    //  -x0: color
-    //  -x1: coordenada x
-    //  -x2: coordenada y
-    // Outputs: ninguno
-    // Registros modificados por esta función (no preservado):
-    // - x15: dirección de la posición (x,y) calculada
+/*  RECORDAR QUE X28 = dirección base del framebuffer
+    Function: draw_pixel
+    Description: Dibuja un píxel en la pantalla en la posición (x, y) con un color dado.
+    Inputs (no preservado):
+        -x0: color
+        -x1: coordenada x
+        -x2: coordenada y
+    Outputs: None.
+    Registros modificados por esta función (no preservado):
+        -x15: dirección de la posición (x,y) calculada
+*/
 draw_pixel:
     // Dirección del pixel (x,y) = Dirección de inicio del framebuffer + 4 * [x + (y * 640)]
     mov x15, SCREEN_WIDTH
@@ -34,26 +33,25 @@ draw_pixel:
     ret
 
 
-    // Function: draw_line
-    // Description: Dibuja una línea en la pantalla dados sus extremos A = (x_0, y_0) y B = (x_1 ,y_1). 
-    //              Implementamos el algoritmo de Bresenham. https://zingl.github.io/bresenham.html
-    // Inputs (no preservados):
-    //  -x0: color
-    //  -x1: coordenada x_0
-    //  -x2: coordenada y_0
-    //  -x3: coordenada x_1
-    //  -x4: coordenada y_1
-    // Outputs: ninguno
-    // Registros usados:
-    // - x7: usada para pasar argumento a abs y recibir su resultado  (no preservado)
-    // - x19: dx
-    // - x20: dy
-    // - x21: err
-    // - x22: sx
-    // - x23: sy
-    // - x24: e2
-
-
+/*  Function: draw_line
+    Description: Dibuja una línea en la pantalla dados sus extremos A = (x_0, y_0) y B = (x_1 ,y_1). 
+                 Implementamos el algoritmo de Bresenham.
+    Inputs (no preservados):
+        -x0: color
+        -x1: coordenada x_0
+        -x2: coordenada y_0
+        -x3: coordenada x_1
+        -x4: coordenada y_1
+    Outputs: ninguno
+    Registros usados:
+        - x7: usada para pasar argumento a abs y recibir su resultado  (no preservado)
+        - x19: dx
+        - x20: dy
+        - x21: err
+        - x22: sx
+        - x23: sy
+        - x24: e2
+*/
 draw_line:
     stp x19, x20, [sp, #-16]!
     stp x21, x22, [sp, #-16]!
@@ -81,40 +79,40 @@ draw_line:
     cmp x2, x4
     csneg x23, x23, x23, lt
 
-._loop_start:
-    bl draw_pixel
-    
-    // if (x_0==x_1 && y_0==y_1) break;
-    // Para A && B, primero comprobamos A. Si A es falso, el AND es falso.
-    // Si A es verdadero, entonces comprobamos B.
-    cmp x1, x3
-    b.ne ._continue_loop
+    ._loop_start:
+        bl draw_pixel
+        
+        // if (x_0==x_1 && y_0==y_1) break;
+        // Para A && B, primero comprobamos A. Si A es falso, el AND es falso.
+        // Si A es verdadero, entonces comprobamos B.
+        cmp x1, x3
+        b.ne ._continue_loop
 
-    cmp x2, x4
-    b.eq ._loop_end
+        cmp x2, x4
+        b.eq ._loop_end
 
-._continue_loop:        // continuo si not(x_0 == x_1 && y_0==y_1)
-    lsl x24, x21, #1
+        ._continue_loop:        // continuo si not(x_0 == x_1 && y_0==y_1)
+            lsl x24, x21, #1
 
-    // if (e2 >= dy) { err += dy; x0 += sx; }
-    // Si e2 < dx salta el if.
-    cmp x24, x20
-    b.lt ._skip_x_if
+            // if (e2 >= dy) { err += dy; x0 += sx; }
+            // Si e2 < dx salta el if.
+            cmp x24, x20
+            b.lt ._skip_x_if
 
-    add x21, x21, x20
-    add x1, x1, x22
+            add x21, x21, x20
+            add x1, x1, x22
 
-._skip_x_if:
-    cmp x24, x19
-    b.gt ._skip_y_if
+        ._skip_x_if:
+            cmp x24, x19
+            b.gt ._skip_y_if
 
-    add x21, x21, x19
-    add x2, x2, x23
+            add x21, x21, x19
+            add x2, x2, x23
 
-._skip_y_if:
-    b ._loop_start
+        ._skip_y_if:
+            b ._loop_start
 
-._loop_end:
+    ._loop_end:
     ldr x30, [sp], #8
     ldp x23, x24, [sp], #16
     ldp x21, x22, [sp], #16
@@ -495,31 +493,31 @@ draw_rectangle:
 
     // Bucle exterior: iterar sobre y desde y_start hasta y_end
     mov x24, x21            // x24 = y_current = y_start
-outer_loop:
-    cmp x24, x23            // Comparar y_current con y_end
-    b.gt end_outer_loop     // Si y_current > y_end, salir
+    ._outer_loop:
+        cmp x24, x23            // Comparar y_current con y_end
+        b.gt ._end_outer_loop     // Si y_current > y_end, salir
 
-    // Bucle interior: iterar sobre x desde x_start hasta x_end
-    mov x25, x20            // x25 = x_current = x_start
-inner_loop:
-    cmp x25, x22            // Comparar x_current con x_end
-    b.gt end_inner_loop     // Si x_current > x_end, salir del bucle interior
+        // Bucle interior: iterar sobre x desde x_start hasta x_end
+        mov x25, x20            // x25 = x_current = x_start
+        ._inner_loop:
+            cmp x25, x22            // Comparar x_current con x_end
+            b.gt ._end_inner_loop     // Si x_current > x_end, salir del bucle interior
 
-    // Dibujar pixel en (x_current, y_current) con color
-    mov x0, x19             // x0 = color
-    mov x1, x25             // x1 = x_current
-    mov x2, x24             // x2 = y_current
-    bl draw_pixel           // Llamar a draw_pixel
+            // Dibujar pixel en (x_current, y_current) con color
+            mov x0, x19             // x0 = color
+            mov x1, x25             // x1 = x_current
+            mov x2, x24             // x2 = y_current
+            bl draw_pixel           // Llamar a draw_pixel
 
-    // Incrementar x_current
-    add x25, x25, #1        // x_current++
-    b inner_loop            // Volver al inicio del bucle interior
-end_inner_loop:
+            // Incrementar x_current
+            add x25, x25, #1        // x_current++
+            b ._inner_loop            // Volver al inicio del bucle interior
+        ._end_inner_loop:
 
-    // Incrementar y_current
-    add x24, x24, #1        // y_current++
-    b outer_loop            // Volver al inicio del bucle exterior
-end_outer_loop:
+        // Incrementar y_current
+        add x24, x24, #1        // y_current++
+        b ._outer_loop            // Volver al inicio del bucle exterior
+    ._end_outer_loop:
 
     // Restaurar registros y pila
     ldp x19, x20, [sp, #16] // Restaurar x19, x20
@@ -529,30 +527,27 @@ end_outer_loop:
     add sp, sp, #64         // Liberar espacio en la pila
     ret
 
-
-
-// Function: draw_semi_circle
-// Description: Dibuja un semicirculo en la pantalla dado su centro (x0, y0), radio r, y direccion.
-//              Puede ser relleno o no, dependiendo del parametro fill_flag.
-// Inputs:
-//  -x0: color
-//  -x1: coordenada x del centro
-//  -x2: coordenada y del centro
-//  -x3: radio r
-//  -x4: direccion (0: arriba, 1: abajo, 2: izquierda, 3: derecha)
-//  -x5: fill_flag (0: no relleno, 1: relleno)
-// Outputs: no hay
-// Registros modificados: ninguno aparte de los temporales
-
+/*  Function: draw_semi_circle
+    Description: Dibuja un semicirculo en la pantalla dado su centro (x0, y0), radio r, y direccion.
+              Puede ser relleno o no, dependiendo del parametro fill_flag.
+    Inputs:
+        -x0: color
+        -x1: coordenada x del centro
+        -x2: coordenada y del centro
+        -x3: radio r
+        -x4: direccion (0: arriba, 1: abajo, 2: izquierda, 3: derecha)
+        -x5: fill_flag (0: no relleno, 1: relleno)
+    Outputs: None.
+    Registros modificados: Ninguno aparte de los temporales.
+*/
 draw_semi_circle:
     // Guardar los registros y reservar espacio en la pila
-    sub sp, sp, #64         // Reservar 64 bytes: 16 para x29/x30, 48 para temporales
-    stp x29, x30, [sp, #0]  // Guardar FP y LR
-    mov x29, sp             // Actualizar FP
-    stp x19, x20, [sp, #16] // Guardar x19, x20
-    stp x21, x22, [sp, #32] // Guardar x21, x22
-    stp x23, x24, [sp, #48] // Guardar x23, x24
-
+    sub sp, sp, #64
+    stp x29, x30, [sp, #0]
+    mov x29, sp             
+    stp x19, x20, [sp, #16]
+    stp x21, x22, [sp, #32]
+    stp x23, x24, [sp, #48]
     // Copiar los parámetros a registros temporales
     mov x19, x0             // x19 = color
     mov x20, x1             // x20 = x_center
@@ -563,125 +558,126 @@ draw_semi_circle:
 
     // Inicializar variables para el algoritmo de Bresenham
     mov x24, #0             // x = 0
-    mov x25, x22            // y = radius
-    sub x26, xzr, x22       // d = -radius
+    mov x25, x22            // y = radio
+    sub x26, xzr, x22       // d = -radio
 
     // Bucle principal del algoritmo de Bresenham
-._semi_circle_loop:
-    // Dibujar según la dirección
-    cmp x23, #0             // Direccion: arriba
-    b.eq ._draw_upper
-    cmp x23, #1             // Direccion: abajo
-    b.eq ._draw_lower
-    cmp x23, #2             // Direccion: izquierda
-    b.eq ._draw_left
-    cmp x23, #3             // Direccion: derecha
-    b.eq ._draw_right
-    b ._end_semi_circle     // Direccion no valida, salir
+    ._semi_circle_loop:
+        // Dibujar según la dirección
+        cmp x23, #0             // Direccion: arriba
+        b.eq ._draw_upper
+        cmp x23, #1             // Direccion: abajo
+        b.eq ._draw_lower
+        cmp x23, #2             // Direccion: izquierda
+        b.eq ._draw_left
+        cmp x23, #3             // Direccion: derecha
+        b.eq ._draw_right
+        b ._end_semi_circle     // Direccion no valida, salir
 
-._draw_upper:
-    cmp x5, #1
-    b.eq ._draw_line_upper
-    // Dibujar puntos para contorno
-    mov x0, x19             // color
-    sub x1, x20, x24        // x_center - x
-    sub x2, x21, x25        // y_center - y
-    bl draw_pixel
-    add x1, x20, x24        // x_center + x
-    sub x2, x21, x25        // y_center - y
-    bl draw_pixel
-    b ._update_loop
-._draw_line_upper:
-    // Dibujar linea horizontal desde (x_center - x, y_center - y) hasta (x_center + x, y_center - y)
-    mov x0, x19             // color
-    sub x1, x20, x24        // x_start = x_center - x
-    sub x2, x21, x25        // y_start = y_center - y
-    add x3, x20, x24        // x_end = x_center + x
-    mov x4, x2              // y_end = y_start
-    bl draw_line
-    b ._update_loop
+    ._draw_upper:
+        cmp x5, #1
+        b.eq ._draw_line_upper
+        // Dibujar puntos para contorno
+        mov x0, x19             // color
+        sub x1, x20, x24        // x_center - x
+        sub x2, x21, x25        // y_center - y
+        bl draw_pixel
+        add x1, x20, x24        // x_center + x
+        sub x2, x21, x25        // y_center - y
+        bl draw_pixel
+        b ._update_loop
+    ._draw_line_upper:
+        // Dibujar linea horizontal desde (x_center - x, y_center - y) hasta (x_center + x, y_center - y)
+        mov x0, x19             // color
+        sub x1, x20, x24        // x_start = x_center - x
+        sub x2, x21, x25        // y_start = y_center - y
+        add x3, x20, x24        // x_end = x_center + x
+        mov x4, x2              // y_end = y_start
+        bl draw_line
+        b ._update_loop
 
-._draw_lower:
-    cmp x5, #1
-    b.eq ._draw_line_lower
-    // Dibujar puntos para contorno
-    mov x0, x19             // color
-    sub x1, x20, x24        // x_center - x
-    add x2, x21, x25        // y_center + y
-    bl draw_pixel
-    add x1, x20, x24        // x_center + x
-    add x2, x21, x25        // y_center + y
-    bl draw_pixel
-    b ._update_loop
-._draw_line_lower:
-    // Dibujar linea horizontal desde (x_center - x, y_center + y) hasta (x_center + x, y_center + y)
-    mov x0, x19             // color
-    sub x1, x20, x24        // x_start = x_center - x
-    add x2, x21, x25        // y_start = y_center + y
-    add x3, x20, x24        // x_end = x_center + x
-    mov x4, x2              // y_end = y_start
-    bl draw_line
-    b ._update_loop
+    ._draw_lower:
+        cmp x5, #1
+        b.eq ._draw_line_lower
+        // Dibujar puntos para contorno
+        mov x0, x19             // color
+        sub x1, x20, x24        // x_center - x
+        add x2, x21, x25        // y_center + y
+        bl draw_pixel
+        add x1, x20, x24        // x_center + x
+        add x2, x21, x25        // y_center + y
+        bl draw_pixel
+        b ._update_loop
+    ._draw_line_lower:
+        // Dibujar linea horizontal desde (x_center - x, y_center + y) hasta (x_center + x, y_center + y)
+        mov x0, x19             // color
+        sub x1, x20, x24        // x_start = x_center - x
+        add x2, x21, x25        // y_start = y_center + y
+        add x3, x20, x24        // x_end = x_center + x
+        mov x4, x2              // y_end = y_start
+        bl draw_line
+        b ._update_loop
 
-._draw_left:
-    cmp x5, #1
-    b.eq ._draw_line_left
-    // Dibujar puntos para contorno
-    mov x0, x19             // color
-    sub x1, x20, x25        // x_center - y
-    sub x2, x21, x24        // y_center - x
-    bl draw_pixel
-    sub x1, x20, x25        // x_center - y
-    add x2, x21, x24        // y_center + x
-    bl draw_pixel
-    b ._update_loop
-._draw_line_left:
-    // Dibujar linea vertical desde (x_center - y, y_center - x) hasta (x_center - y, y_center + x)
-    mov x0, x19             // color
-    sub x1, x20, x25        // x_start = x_center - y
-    sub x2, x21, x24        // y_start = y_center - x
-    mov x3, x1              // x_end = x_start
-    add x4, x21, x24        // y_end = y_center + x
-    bl draw_line
-    b ._update_loop
+    ._draw_left:
+        cmp x5, #1
+        b.eq ._draw_line_left
+        // Dibujar puntos para contorno
+        mov x0, x19             // color
+        sub x1, x20, x25        // x_center - y
+        sub x2, x21, x24        // y_center - x
+        bl draw_pixel
+        sub x1, x20, x25        // x_center - y
+        add x2, x21, x24        // y_center + x
+        bl draw_pixel
+        b ._update_loop
+    ._draw_line_left:
+        // Dibujar linea vertical desde (x_center - y, y_center - x) hasta (x_center - y, y_center + x)
+        mov x0, x19             // color
+        sub x1, x20, x25        // x_start = x_center - y
+        sub x2, x21, x24        // y_start = y_center - x
+        mov x3, x1              // x_end = x_start
+        add x4, x21, x24        // y_end = y_center + x
+        bl draw_line
+        b ._update_loop
 
-._draw_right:
-    cmp x5, #1
-    b.eq ._draw_line_right
-    // Dibujar puntos para contorno
-    mov x0, x19             // color
-    add x1, x20, x25        // x_center + y
-    sub x2, x21, x24        // y_center - x
-    bl draw_pixel
-    add x1, x20, x25        // x_center + y
-    add x2, x21, x24        // y_center + x
-    bl draw_pixel
-    b ._update_loop
-._draw_line_right:
-    // Dibujar linea vertical desde (x_center + y, y_center - x) hasta (x_center + y, y_center + x)
-    mov x0, x19             // color
-    add x1, x20, x25        // x_start = x_center + y
-    sub x2, x21, x24        // y_start = y_center - x
-    mov x3, x1              // x_end = x_start
-    add x4, x21, x24        // y_end = y_center + x
-    bl draw_line
-    b ._update_loop
+    ._draw_right:
+        cmp x5, #1
+        b.eq ._draw_line_right
+        // Dibujar puntos para contorno
+        mov x0, x19             // color
+        add x1, x20, x25        // x_center + y
+        sub x2, x21, x24        // y_center - x
+        bl draw_pixel
+        add x1, x20, x25        // x_center + y
+        add x2, x21, x24        // y_center + x
+        bl draw_pixel
+        b ._update_loop
+    ._draw_line_right:
+        // Dibujar linea vertical desde (x_center + y, y_center - x) hasta (x_center + y, y_center + x)
+        mov x0, x19             // color
+        add x1, x20, x25        // x_start = x_center + y
+        sub x2, x21, x24        // y_start = y_center - x
+        mov x3, x1              // x_end = x_start
+        add x4, x21, x24        // y_end = y_center + x
+        bl draw_line
+        b ._update_loop
 
-._update_loop:
-    // Actualizar las variables de Bresenham
-    add x26, x26, x24, lsl #1
-    add x26, x26, #1
-    add x24, x24, #1
-    cmp x26, #0
-    b.lt ._skip_y_decrement
-    sub x25, x25, #1
-    sub x26, x26, x25, lsl #1
-    sub x26, x26, #1
-._skip_y_decrement:
-    cmp x24, x25
-    b.le ._semi_circle_loop
+    ._update_loop:
+        // Actualizar las variables de Bresenham
+        add x26, x26, x24, lsl #1
+        add x26, x26, #1
+        add x24, x24, #1
+        cmp x26, #0
+        b.lt ._skip_y_decrement
+        sub x25, x25, #1
+        sub x26, x26, x25, lsl #1
+        sub x26, x26, #1
+    ._skip_y_decrement:
+        cmp x24, x25
+        b.le ._semi_circle_loop
 
-._end_semi_circle:
+    ._end_semi_circle:
+
     // Restaurar los registros y pila
     ldp x19, x20, [sp, #16]
     ldp x21, x22, [sp, #32]
@@ -691,36 +687,34 @@ draw_semi_circle:
     ret
 
 
-// Function: draw_parallelogram
-// Description: Dibuja un paralelogramo relleno en la pantalla, definido por un punto de inicio y dos vectores.
-// Inputs:
-//  - x0: color
-//  - x1: x0 (coordenada x del punto de inicio)  
-//  - x2: y0 (coordenada y del punto de inicio)
-//  - x3: ux (componente x del primer vector)    
-//  - x4: uy (componente y del primer vector)
-//  - x5: vx (componente x del segundo vector)   
-//  - x6: vy (componente y del segundo vector)
-// 
-//  Los puntos x0 e y0 son el punto inicial, llamemoslo A. 
-//  El vector u (ux, uy) define el primer lado desde el punto A hasta el punto B.
-//  El vector v (vx, vy) define el segundo lado desde el punto A hasta el punto D
-//
-// Outputs: ninguno
-// Registros modificados: ninguno aparte de los temporales
-
+/*  Function: draw_parallelogram
+    Description: Dibuja un paralelogramo relleno en la pantalla, definido por un punto de inicio y dos vectores.
+    Inputs:
+        - x0: color
+        - x1: x0 (coordenada x del punto de inicio)  
+        - x2: y0 (coordenada y del punto de inicio)
+        - x3: ux (componente x del primer vector)    
+        - x4: uy (componente y del primer vector)
+        - x5: vx (componente x del segundo vector)   
+        - x6: vy (componente y del segundo vector)
+    Los puntos x0 e y0 son el punto inicial, llamemoslo A. 
+    El vector u (ux, uy) define el primer lado desde el punto A hasta el punto B.
+    El vector v (vx, vy) define el segundo lado desde el punto A hasta el punto D
+    Outputs: None
+    Registros modificados: ninguno aparte de los temporales
+*/
 draw_parallelogram:
     // Guardar registros en la pila
-    sub sp, sp, #128        // Reservar 128 bytes: 16 para x29/x30, 80 para parametros, 32 para temporales
-    stp x29, x30, [sp, #0]  // Guardar FP y LR
-    add x29, sp, #0         // Set FP
-    str x0, [x29, #16]      // Guardar color
-    str x1, [x29, #24]      // Guardar x0
-    str x2, [x29, #32]      // Guardar y0
-    str x3, [x29, #40]      // Guardar ux
-    str x4, [x29, #48]      // Guardar uy
-    str x5, [x29, #56]      // Guardar vx
-    str x6, [x29, #64]      // Guardar vy
+    sub sp, sp, #128
+    stp x29, x30, [sp, #0]
+    add x29, sp, #0
+    str x0, [x29, #16]
+    str x1, [x29, #24]
+    str x2, [x29, #32]
+    str x3, [x29, #40]
+    str x4, [x29, #48]
+    str x5, [x29, #56]
+    str x6, [x29, #64]
 
     // Calcular los vertices del paralelogramo
     // A = (x0, y0)
@@ -774,103 +768,105 @@ draw_parallelogram:
 
     // Bucle para cada y en [y_min, y_max]
     mov x21, x19            // y_current = y_min
-._fill_loop:
-    cmp x21, x20            // Comparar y_current con y_max
-    b.gt ._end_fill_loop    // Si y_current > y_max, salir
+    ._fill_loop:
+        cmp x21, x20            // Comparar y_current con y_max
+        b.gt ._end_fill_loop    // Si y_current > y_max, salir
 
-    // Encontrar intersecciones de la linea y = y_current con los lados
-    // Almacenar x_min y x_max para la línea horizontal
-    mov x22, #0x7FFFFFFF    // x_min = max_int
-    mov x23, #-0x80000000   // x_max = min_int
+        // Encontrar intersecciones de la linea y = y_current con los lados
+        // Almacenar x_min y x_max para la línea horizontal
+        mov x22, #0x7FFFFFFF    // x_min = max_int
+        mov x23, #-0x80000000   // x_max = min_int
 
-    // Verificar interseccion con lado A-B: (x_A, y_A) a (x_B, y_B)
-    ldr x1, [x29, #80]      // x_A
-    ldr x2, [x29, #88]      // y_A
-    ldr x3, [x29, #96]      // x_B
-    ldr x4, [x29, #104]     // y_B
-    bl ._check_intersection
-    cbz x0, ._skip_ab       // Si no hay interseccion, saltar
-    cmp x9, x22             // Comparar x_inter con x_min
-    csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
-    cmp x9, x23             // Comparar x_inter con x_max
-    csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
-._skip_ab:
+        // Verificar interseccion con lado A-B: (x_A, y_A) a (x_B, y_B)
+        ldr x1, [x29, #80]      // x_A
+        ldr x2, [x29, #88]      // y_A
+        ldr x3, [x29, #96]      // x_B
+        ldr x4, [x29, #104]     // y_B
+        bl ._check_intersection
+        cbz x0, ._skip_ab       // Si no hay interseccion, saltar
+        cmp x9, x22             // Comparar x_inter con x_min
+        csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
+        cmp x9, x23             // Comparar x_inter con x_max
+        csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
+    ._skip_ab:
 
-    // Verificar interseccion con lado B-C: (x_B, y_B) a (x_C, y_C)
-    ldr x1, [x29, #96]      // x_B
-    ldr x2, [x29, #104]     // y_B
-    ldr x3, [x29, #112]     // x_C
-    ldr x4, [x29, #120]     // y_C
-    bl ._check_intersection
-    cbz x0, ._skip_bc       // Si no hay interseccion, saltar
-    cmp x9, x22             // Comparar x_inter con x_min
-    csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
-    cmp x9, x23             // Comparar x_inter con x_max
-    csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
-._skip_bc:
+        // Verificar interseccion con lado B-C: (x_B, y_B) a (x_C, y_C)
+        ldr x1, [x29, #96]      // x_B
+        ldr x2, [x29, #104]     // y_B
+        ldr x3, [x29, #112]     // x_C
+        ldr x4, [x29, #120]     // y_C
+        bl ._check_intersection
+        cbz x0, ._skip_bc       // Si no hay interseccion, saltar
+        cmp x9, x22             // Comparar x_inter con x_min
+        csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
+        cmp x9, x23             // Comparar x_inter con x_max
+        csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
+    ._skip_bc:
 
-    // Verificar interseccion con lado C-D: (x_C, y_C) a (x_D, y_D)
-    ldr x1, [x29, #112]     // x_C
-    ldr x2, [x29, #120]     // y_C
-    ldr x3, [x29, #80]      // x_D = x0 + vx
-    ldr x4, [x29, #32]      // y_D = y0 + vy
-    ldr x10, [x29, #56]     // vx
-    ldr x11, [x29, #64]     // vy
-    add x3, x3, x10         // x_D
-    add x4, x4, x11         // y_D
-    bl ._check_intersection
-    cbz x0, ._skip_cd       // Si no hay interseccion, saltar
-    cmp x9, x22             // Comparar x_inter con x_min
-    csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
-    cmp x9, x23             // Comparar x_inter con x_max
-    csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
-._skip_cd:
+        // Verificar interseccion con lado C-D: (x_C, y_C) a (x_D, y_D)
+        ldr x1, [x29, #112]     // x_C
+        ldr x2, [x29, #120]     // y_C
+        ldr x3, [x29, #80]      // x_D = x0 + vx
+        ldr x4, [x29, #32]      // y_D = y0 + vy
+        ldr x10, [x29, #56]     // vx
+        ldr x11, [x29, #64]     // vy
+        add x3, x3, x10         // x_D
+        add x4, x4, x11         // y_D
+        bl ._check_intersection
+        cbz x0, ._skip_cd       // Si no hay interseccion, saltar
+        cmp x9, x22             // Comparar x_inter con x_min
+        csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
+        cmp x9, x23             // Comparar x_inter con x_max
+        csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
+    ._skip_cd:
 
-    // Verificar interseccion con lado D-A: (x_D, y_D) a (x_A, y_A)
-    ldr x1, [x29, #80]      // x_D = x0 + vx
-    ldr x2, [x29, #32]      // y_D = y0 + vy
-    ldr x10, [x29, #56]     // vx
-    ldr x11, [x29, #64]     // vy
-    add x1, x1, x10         // x_D
-    add x2, x2, x11         // y_D
-    ldr x3, [x29, #80]      // x_A
-    ldr x4, [x29, #88]      // y_A
-    bl ._check_intersection
-    cbz x0, ._skip_da       // Si no hay interseccion, saltar
-    cmp x9, x22             // Comparar x_inter con x_min
-    csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
-    cmp x9, x23             // Comparar x_inter con x_max
-    csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
-._skip_da:
+        // Verificar interseccion con lado D-A: (x_D, y_D) a (x_A, y_A)
+        ldr x1, [x29, #80]      // x_D = x0 + vx
+        ldr x2, [x29, #32]      // y_D = y0 + vy
+        ldr x10, [x29, #56]     // vx
+        ldr x11, [x29, #64]     // vy
+        add x1, x1, x10         // x_D
+        add x2, x2, x11         // y_D
+        ldr x3, [x29, #80]      // x_A
+        ldr x4, [x29, #88]      // y_A
+        bl ._check_intersection
+        cbz x0, ._skip_da       // Si no hay interseccion, saltar
+        cmp x9, x22             // Comparar x_inter con x_min
+        csel x22, x9, x22, lt   // x_min = min(x_inter, x_min)
+        cmp x9, x23             // Comparar x_inter con x_max
+        csel x23, x9, x23, gt   // x_max = max(x_inter, x_max)
+    ._skip_da:
 
-    // Dibujar linea horizontal desde x_min hasta x_max en y_current
-    ldr x0, [x29, #16]      // color
-    mov x1, x22             // x_0 = x_min
-    mov x2, x21             // y_0 = y_current
-    mov x3, x23             // x_1 = x_max
-    mov x4, x21             // y_1 = y_current
-    bl draw_line
+        // Dibujar linea horizontal desde x_min hasta x_max en y_current
+        ldr x0, [x29, #16]      // color
+        mov x1, x22             // x_0 = x_min
+        mov x2, x21             // y_0 = y_current
+        mov x3, x23             // x_1 = x_max
+        mov x4, x21             // y_1 = y_current
+        bl draw_line
 
-    // Incrementar y_current
-    add x21, x21, #1
-    b ._fill_loop
+        // Incrementar y_current
+        add x21, x21, #1
+        b ._fill_loop
 
-._end_fill_loop:
+    ._end_fill_loop:
+
     // Restaurar registros y pila
     ldp x29, x30, [sp, #0]  // Restaurar FP y LR
     add sp, sp, #128        // Liberar espacio en la pila
     ret
 
-// Subrutina auxiliar: check_intersection
-// Description: Calcula la interseccion de la linea y = y_current con el segmento de (x1, y1) a (x3, y4)
-// Inputs:
-//  - x1, x2: coordenadas (x, y) del primer punto
-//  - x3, x4: coordenadas (x, y) del segundo punto
-//  - x21: y_current
-// Outputs:
-//  - x0: 1 si hay interseccion, 0 si no
-//  - x9: x_inter (coordenada x de la interseccion, si existe)
-// Registros usados: x10, x11, x12, x13
+/*  Subrutina auxiliar: check_intersection
+    Description: Calcula la interseccion de la linea y = y_current con el segmento de (x1, y1) a (x3, y4)
+    Inputs:
+     - x1, x2: coordenadas (x, y) del primer punto
+     - x3, x4: coordenadas (x, y) del segundo punto
+     - x21: y_current
+    Outputs:
+     - x0: 1 si hay interseccion, 0 si no
+     - x9: x_inter (coordenada x de la interseccion, si existe)
+    Registros usados: x10, x11, x12, x13
+*/
 ._check_intersection:
     // Guardar LR
     str x30, [sp, #-16]!
@@ -897,21 +893,21 @@ draw_parallelogram:
     mov x0, #1                  // Indicar interseccin valida
     b ._end_intersection
 
-._no_intersection:
-    mov x0, #0              // No hay interseccion
+    ._no_intersection:
+        mov x0, #0              // No hay interseccion
 
-._end_intersection:
+    ._end_intersection:
     ldr x30, [sp], #16      // Restaurar LR
     ret
 
-// ============================== Funciones matemáticas ========================
-    // Function: abs
-    // Description: Calcula el valor absoluto del registro x
-    // Inputs:
-    //  -x7: número signado
-    // Outputs: ninguno
-    // Registros usados:
-    // - x19: tal vez sería conveniente usar un registro caller-saved para esta función tan simple. Sería más rápido que cargar x19 a la pila y descargarla luego. Tenia miedo de olvidarme de guardarla cuando llame abs. TODO
+/*  Function: abs
+    Description: Calcula el valor absoluto del registro x
+    Inputs:
+        -x7: Número signado
+    Outputs: None
+    Registros usados:
+        -x19
+*/
 abs:
     str x19, [sp, -8]!
     cmp x7, #0           // Compara x7 con 0, actualiza flags
