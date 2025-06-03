@@ -213,6 +213,14 @@ draw_casa_patricio:
     mov x5, #80
     bl draw_fill_semi_circle
 
+    // Sombreado para la casa. Color: #672f28
+    movz x0, 0x67, lsl 16
+    movk x0, 0x2f28, lsl 0
+    mov x3, #95
+    mov x4, #389
+    mov x5, #73
+    bl draw_fill_semi_circle
+
     
     movz x0, 0xF1, lsl #16  // Color: #F19803 <- antena
 	movk x0, 0x9803, lsl #0

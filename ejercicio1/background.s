@@ -706,8 +706,8 @@ draw_road:
 
 	movz x0, #0x1e, lsl #16
 	movk x0, #0x3253, lsl #0
-	mov x3, #208
-	mov x4, #425
+	mov x3, #240
+	mov x4, #405
 	mov x5, #6
 	bl draw_fill_semi_circle
 
