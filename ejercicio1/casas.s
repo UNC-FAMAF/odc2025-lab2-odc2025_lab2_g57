@@ -519,38 +519,28 @@ draw_casa_bob:
     bl draw_rectangle
 
 
-
-
-
-
-
-
-
-
-
-
     // Ventanas
     movz x0, 0x45, lsl #16  // Color: #456BB9
 	movk x0, 0x6BB9, lsl #0
-    mov x3, #495
+    mov x3, #498
     mov x4, #252
     mov x5, #20
     bl draw_fill_circle
 
-    mov x3, #565
+    mov x3, #567
     mov x4, #320
     mov x5, #20
     bl draw_fill_circle
 
     movz x0, 0x5E, lsl #16  // Color: #5EB5E7
 	movk x0, 0xB5E7, lsl #0
-    mov x3, #495
+    mov x3, #498
     mov x4, #252
     mov x5, #10
     bl draw_fill_circle
     
 
-    mov x3, #565
+    mov x3, #567
     mov x4, #320
     mov x5, #10
     bl draw_fill_circle
