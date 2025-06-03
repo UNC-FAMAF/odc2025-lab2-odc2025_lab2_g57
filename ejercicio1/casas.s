@@ -305,7 +305,7 @@ draw_casa_bob:
 
 
     // ANANA
-    movz x0, 0xe0, lsl #16  // Color: #cf3c06 <- casa de bob
+    movz x0, 0xe0, lsl #16  // Color: #e06903 <- casa de bob
 	movk x0, 0x690e, lsl #0
 
     mov x1, #470           // x0: coordenada x inicial
@@ -397,6 +397,163 @@ draw_casa_bob:
     mov x4, #265
     mov x5, #68      
     bl draw_fill_semi_circle
+
+    // Detalles del anana
+    movz x0, 0x97, lsl #16  // Color: #972305
+	movk x0, 0x2305, lsl #0
+    mov x1, #527
+    mov x2, #197
+    mov x3, #3
+    mov x4, #-3
+    mov x5, #70
+    mov x6, #80
+    bl draw_parallelogram
+
+    mov x1, #477
+    mov x2, #217
+    mov x3, #3
+    mov x4, #-3
+    mov x5, #117
+    mov x6, #130
+    bl draw_parallelogram
+    
+
+    mov x1, #454
+    mov x2, #267
+    mov x3, #3
+    mov x4, #-3
+    mov x5, #109
+    mov x6, #123
+    bl draw_parallelogram
+
+    mov x1, #455
+    mov x2, #347
+    mov x3, #3
+    mov x4, #-3
+    mov x5, #39
+    mov x6, #43
+    bl draw_parallelogram
+
+    // INCL DERECHA
+
+    mov x1, #543
+    mov x2, #199
+    mov x3, #3
+    mov x4, #3
+    mov x5, #-90
+    mov x6, #70
+    bl draw_parallelogram
+
+    mov x1, #584
+    mov x2, #232
+    mov x3, #3
+    mov x4, #3
+    mov x5, #-130
+    mov x6, #115
+    bl draw_parallelogram
+
+    mov x1, #599
+    mov x2, #287
+    mov x3, #1
+    mov x4, #4
+    mov x5, #-110
+    mov x6, #100
+    bl draw_parallelogram
+    
+    mov x1, #590
+    mov x2, #366
+    mov x3, #2
+    mov x4, #2
+    mov x5, #-27
+    mov x6, #20
+    bl draw_parallelogram
+
+    // detalles cuadraditos
+    mov x1, #534
+    mov x2, #235
+    mov x3, #538
+    mov x4, #249
+    bl draw_rectangle
+
+    mov x1, #570
+    mov x2, #272
+    mov x3, #574
+    mov x4, #286
+    bl draw_rectangle
+
+    mov x1, #531
+    mov x2, #307
+    mov x3, #535
+    mov x4, #321
+    bl draw_rectangle
+
+
+    mov x1, #496
+    mov x2, #271
+    mov x3, #500
+    mov x4, #285
+    bl draw_rectangle
+
+    mov x1, #459
+    mov x2, #301
+    mov x3, #463
+    mov x4, #315
+    bl draw_rectangle
+
+    mov x1, #493
+    mov x2, #342
+    mov x3, #497
+    mov x4, #356
+    bl draw_rectangle
+
+    mov x1, #528
+    mov x2, #373
+    mov x3, #532
+    mov x4, #387
+    bl draw_rectangle
+
+    mov x1, #565
+    mov x2, #348
+    mov x3, #569
+    mov x4, #362
+    bl draw_rectangle
+
+
+
+
+
+
+
+
+
+
+
+
+    // Ventanas
+    movz x0, 0x45, lsl #16  // Color: #456BB9
+	movk x0, 0x6BB9, lsl #0
+    mov x3, #495
+    mov x4, #252
+    mov x5, #20
+    bl draw_fill_circle
+
+    mov x3, #565
+    mov x4, #320
+    mov x5, #20
+    bl draw_fill_circle
+
+    movz x0, 0x5E, lsl #16  // Color: #5EB5E7
+	movk x0, 0xB5E7, lsl #0
+    mov x3, #495
+    mov x4, #252
+    mov x5, #10
+    bl draw_fill_circle
+    
+
+    mov x3, #565
+    mov x4, #320
+    mov x5, #10
+    bl draw_fill_circle
 
 
     ldr lr, [sp], #8

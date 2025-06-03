@@ -20,6 +20,7 @@ main:
 
 	bl draw_casa_calamardo
 	bl draw_casa_patricio
+	bl draw_casa_bob
 
 	
 

@@ -612,11 +612,41 @@ draw_road:
     movz x0, 0x20, lsl #16
 	movk x0, 0x3A37, lsl #00
 
+    // recta larga
+    mov x1, #101
+    mov x2, #452
+    mov x3, #431
+    mov x4, #455
+    bl draw_rectangle
+    // parte derecha hasta camino bob
     mov x1, #516
     mov x2, #447
     mov x3, #640
     mov x4, #450
     bl draw_rectangle
+    // parte izquierda hasta camino patricio
+    mov x1, #0
+    mov x2, #447
+    mov x3, #28
+    mov x4, #450
+    bl draw_rectangle
+    
+    // cordón camino patricio
+    mov x1, #61
+    mov x2, #390
+    mov x3, #3
+    mov x4, #0
+    mov x5, #-35
+    mov x6, #57
+    bl draw_parallelogram
+
+    mov x1, #140
+    mov x2, #390
+    mov x3, #3
+    mov x4, #0
+    mov x5, #-38
+    mov x6, #61
+    bl draw_parallelogram
 
     // Camino Bob.
     movz x0, 0x3B, lsl #16
@@ -629,23 +659,6 @@ draw_road:
     mov x6, #60
     bl draw_parallelogram
 
-    // recta larga
-    movz x0, 0x20, lsl #16
-	movk x0, 0x3A37, lsl #00
-    mov x1, #101
-    mov x2, #452
-    mov x3, #431
-    mov x4, #455
-    bl draw_rectangle
-
-    // Borde ruta parte izq. hasta el camino de patricio.
-    movz x0, 0x20, lsl #16
-	movk x0, 0x3A37, lsl #00
-    mov x1, #0
-    mov x2, #447
-    mov x3, #28
-    mov x4, #450
-    bl draw_rectangle
 
     //camino casa patricio
     movz x0, 0x3B, lsl #16
@@ -922,7 +935,7 @@ draw_odc_sign:
 
     // letras
     // O
-    movz x0, 0x00, lsl #16  // Color (palo): #000000
+    movz x0, 0x00, lsl #16  // Color (letra): #000000
 	movk x0, 0x0000, lsl #0
     mov x1, #177
     mov x2, #396
