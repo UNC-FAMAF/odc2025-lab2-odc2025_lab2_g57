@@ -710,14 +710,13 @@ draw_casa_bob:
         mov x4, #362
         bl draw_rectangle
 
-    // Ventanas
-        movz x0, 0x0005, lsl #16  // Color
-	    movk x0, 0x100A, lsl #0
+    // Ventana superior
+        movz x0, 0x17, lsl #16  // Color
+	    movk x0, 0x2740, lsl #0
         mov x3, #498
         mov x4, #252
         mov x5, #22
         bl draw_fill_circle
-
 
         movz x0, 0x45, lsl #16  // Color: #456BB9
 	    movk x0, 0x6BB9, lsl #0
@@ -733,6 +732,159 @@ draw_casa_bob:
         mov x5, #10
         bl draw_fill_circle
 
+        // Ventana inferior
+        movz x0, 0x17, lsl #16  // Color
+	    movk x0, 0x2740, lsl #0
+        mov x3, #565
+        mov x4, #310
+        mov x5, #22
+        bl draw_fill_circle
+
+        movz x0, 0x45, lsl #16  // Color: #456BB9
+	    movk x0, 0x6BB9, lsl #0
+        mov x3, #565
+        mov x4, #310
+        mov x5, #20
+        bl draw_fill_circle
+
+        movz x0, 0x5E, lsl #16  // Color: #5EB5E7
+	    movk x0, 0xB5E7, lsl #0
+        mov x3, #565
+        mov x4, #310
+        mov x5, #10
+        bl draw_fill_circle
+
+        //Contorno de la puerta
+        movz x0, 0x0005, lsl #16
+	    movk x0, 0x100A, lsl #0
+        mov x1, #500
+        mov x2, #348
+        mov x3, #552
+        mov x4, #389
+        bl draw_rectangle
+
+        mov x3, #526
+        mov x4, #352
+        mov x5, #26
+        bl draw_fill_semi_circle
+
+        // Borde azulado puerta.
+        movz x0, 0x2f, lsl #16
+        movk x0, 0x3c9a, lsl #0
+        mov x1, #501
+        mov x2, #348
+        mov x3, #551
+        mov x4, #389
+        bl draw_rectangle
+
+        mov x3, #526
+        mov x4, #352
+        mov x5, #25
+        bl draw_fill_semi_circle
+
+        // Contorno puerta interior
+        movz x0, 0x0005, lsl #16
+	    movk x0, 0x100A, lsl #0
+        mov x1, #506
+        mov x2, #350
+        mov x3, #546
+        mov x4, #389
+        bl draw_rectangle
+
+        mov x3, #526
+        mov x4, #354
+        mov x5, #20
+        bl draw_fill_semi_circle
+
+        // Puerta.
+        movz x0, 0x45, lsl #16
+        movk x0, 0x6bb9, lsl #0
+        mov x1, #507
+        mov x2, #352
+        mov x3, #545
+        mov x4, #389
+        bl draw_rectangle
+
+        mov x3, #526
+        mov x4, #354
+        mov x5, #19
+        bl draw_fill_semi_circle
+
+        // Timón de la puerta.
+        movz x0, 0x1e, lsl #16
+        movk x0, 0x3253, lsl #0
+        mov x3, #526
+        mov x4, #365
+        mov x5, #6
+        bl draw_fill_circle
+
+        // Manija superior derecha
+        mov x1, #531
+        mov x2, #360
+        mov x3, #537
+        mov x4, #354
+        bl draw_line
+        mov x1, #531
+        mov x2, #359
+        mov x3, #536
+        mov x4, #354
+        bl draw_line
+        mov x1, #532
+        mov x2, #360
+        mov x3, #537
+        mov x4, #355
+        bl draw_line
+
+        // Manija superior izquierda
+        mov x1, #521
+        mov x2, #360
+        mov x3, #515
+        mov x4, #354
+        bl draw_line
+        mov x1, #521
+        mov x2, #359
+        mov x3, #516
+        mov x4, #354
+        bl draw_line
+        mov x1, #520
+        mov x2, #360
+        mov x3, #515
+        mov x4, #355
+        bl draw_line
+
+        // Manija inferior izquierda
+        mov x1, #521
+        mov x2, #370
+        mov x3, #516
+        mov x4, #375
+        bl draw_line
+        mov x1, #520
+        mov x2, #370
+        mov x3, #516
+        mov x4, #374
+        bl draw_line
+        mov x1, #521
+        mov x2, #371
+        mov x3, #517
+        mov x4, #375
+        bl draw_line
+
+        // Manija inferior derecha
+        mov x1, #531
+        mov x2, #370
+        mov x3, #536
+        mov x4, #375
+        bl draw_line
+        mov x1, #532
+        mov x2, #370
+        mov x3, #536
+        mov x4, #374
+        bl draw_line
+        mov x1, #531
+        mov x2, #371
+        mov x3, #535
+        mov x4, #375
+        bl draw_line
 
     ldr lr, [sp], #8
     ret
