@@ -99,9 +99,31 @@ main:
 
 	bl draw_casa_calamardo
 	bl draw_casa_patricio
+
+	// EJEMPLO BURBUJAS
+	mov x19, #607
+	mov x20, #202
+	mov x21, #8
+	bl draw_bubble
+
+	mov x19, #615
+	mov x20, #186
+	mov x21, #7
+	bl draw_bubble
+
+	mov x19, #603
+	mov x20, #178
+	mov x21, #6
+	bl draw_bubble
+
+	mov x19, #607
+	mov x20, #165
+	mov x21, #9
+	bl draw_bubble
+	//----------------------
+
 	bl draw_casa_bob
 
-	
 
 	//---------------------------------------------------------------
 	// Infinite Loopgi
