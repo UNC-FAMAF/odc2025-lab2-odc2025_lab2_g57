@@ -340,10 +340,216 @@ draw_casa_patricio:
     ret
 
 draw_casa_bob:
-    str lr, [sp, #-8]!  
+    str lr, [sp, #-8]!
+
+    //HOJAS ANANA
+
+        //tercer hoja   (3/7)
+            movz x0, 0x22, lsl #16  // Color: #229a00
+            movk x0, 0x9a00, lsl #0
+            mov x1, #522
+            mov x2, #201
+            mov x3, #-20
+            mov x4, #-5
+            mov x5, #-15
+            mov x6, #-70
+            bl draw_parallelogram
+            movz x0, 0x23, lsl #16  // Color: #23631f
+            movk x0, 0x631f, lsl #0
+            mov x1, #512
+            mov x2, #201
+            mov x3, #500
+            mov x4, #140
+            bl draw_line
+            mov x1, #513
+            mov x2, #201
+            mov x3, #500
+            mov x4, #140
+            bl draw_line
+            mov x1, #514
+            mov x2, #201
+            mov x3, #500
+            mov x4, #140
+            bl draw_line
+
+
+        //cuarta hoja   (4/7)
+            movz x0, 0x00, lsl #16  // Color: #008a41
+            movk x0, 0x8a41, lsl #0
+            mov x1, #521
+            mov x2, #200
+            mov x3, #20
+            mov x4, #0
+            mov x5, #-13
+            mov x6, #-60
+            bl draw_parallelogram
+            movz x0, 0x23, lsl #16  // Color: #23631f
+            movk x0, 0x631f, lsl #0
+            mov x1, #529
+            mov x2, #200
+            mov x3, #520
+            mov x4, #150
+            bl draw_line
+            mov x1, #530
+            mov x2, #200
+            mov x3, #520
+            mov x4, #150
+            bl draw_line
+            mov x1, #531
+            mov x2, #200
+            mov x3, #520
+            mov x4, #150
+            bl draw_line
+    
+
+        //septima hoja  (7/7)
+            movz x0, 0x22, lsl #16  // Color: #229a00
+            movk x0, 0x9a00, lsl #0
+            mov x1, #548
+            mov x2, #210
+            mov x3, #20
+            mov x4, #0
+            mov x5, #18
+            mov x6, #-65
+            bl draw_parallelogram
+            movz x0, 0x23, lsl #16  // Color: #23631f
+            movk x0, 0x631f, lsl #0
+            mov x1, #560
+            mov x2, #208
+            mov x3, #577
+            mov x4, #151
+            bl draw_line
+            mov x1, #561
+            mov x2, #208
+            mov x3, #577
+            mov x4, #151
+            bl draw_line
+            mov x1, #562
+            mov x2, #208
+            mov x3, #577
+            mov x4, #151
+            bl draw_line
+
+
+        //sexta hoja    (6/7)
+            movz x0, 0x00, lsl #16  // Color: #008a41
+            movk x0, 0x8a41, lsl #0
+            mov x1, #538   
+            mov x2, #206
+            mov x3, #15
+            mov x4, #7
+            mov x5, #10
+            mov x6, #-58
+            bl draw_parallelogram
+            movz x0, 0x23, lsl #16  // Color: #23631f
+            movk x0, 0x631f, lsl #0
+            mov x1, #548
+            mov x2, #205
+            mov x3, #560
+            mov x4, #157
+            bl draw_line
+            mov x1, #549
+            mov x2, #205
+            mov x3, #560
+            mov x4, #157
+            bl draw_line
+            mov x1, #547
+            mov x2, #205
+            mov x3, #560
+            mov x4, #157
+            bl draw_line
+
+
+        //quinta hoja   (5/7)   
+            movz x0, 0x22, lsl #16  // Color: #229a00
+            movk x0, 0x9a00, lsl #0
+            mov x1, #522
+            mov x2, #200
+            mov x3, #20
+            mov x4, #0
+            mov x5, #15
+            mov x6, #-70
+            bl draw_parallelogram
+            movz x0, 0x23, lsl #16  // Color: #23631f
+            movk x0, 0x631f, lsl #0
+            mov x1, #535
+            mov x2, #200
+            mov x3, #548
+            mov x4, #137
+            bl draw_line
+            mov x1, #536
+            mov x2, #200
+            mov x3, #548
+            mov x4, #137
+            bl draw_line
+            mov x1, #537
+            mov x2, #200
+            mov x3, #548
+            mov x4, #137
+            bl draw_line
+
+
+        //segunda hoja  (2/7)
+            movz x0, 0x00, lsl #16  // Color: #008a41
+            movk x0, 0x8a41, lsl #0
+            mov x1, #512
+            mov x2, #215
+            mov x3, #-20
+            mov x4, #-5
+            mov x5, #-20
+            mov x6, #-65
+            bl draw_parallelogram
+            movz x0, 0x23, lsl #16  // Color: #23631f
+            movk x0, 0x631f, lsl #0
+            mov x1, #503
+            mov x2, #205
+            mov x3, #485
+            mov x4, #154
+            bl draw_line
+            mov x1, #504
+            mov x2, #205
+            mov x3, #485
+            mov x4, #154
+            bl draw_line
+            mov x1, #505
+            mov x2, #205
+            mov x3, #485
+            mov x4, #154
+            bl draw_line
+
+
+        //primer hoja   (1/7)
+            movz x0, 0x22, lsl #16  // Color: #229a00
+            movk x0, 0x9a00, lsl #0
+            mov x1, #498
+            mov x2, #225
+            mov x3, #-20
+            mov x4, #-5
+            mov x5, #-20
+            mov x6, #-70
+            bl draw_parallelogram
+            movz x0, 0x23, lsl #16  // Color: #23631f
+            movk x0, 0x631f, lsl #0
+            mov x1, #491
+            mov x2, #213
+            mov x3, #472
+            mov x4, #160
+            bl draw_line
+            mov x1, #490
+            mov x2, #213
+            mov x3, #472
+            mov x4, #160
+            bl draw_line
+            mov x1, #489
+            mov x2, #213
+            mov x3, #472
+            mov x4, #160
+            bl draw_line
+        
+
 
     //CHIMENEA
-        movz x0, 0x0005, lsl #16  // Color
+        movz x0, 0x0005, lsl #16  // Color: #05100a
 	    movk x0, 0x100A, lsl #0
         mov x1, #560 
         mov x2, #248
@@ -398,7 +604,7 @@ draw_casa_bob:
         mov x4, #220
         bl draw_rectangle
 
-        movz x0, 0x0005, lsl #16  // Color
+        movz x0, 0x0005, lsl #16  // Color: #05100a
 	    movk x0, 0x100A, lsl #0
         mov x1, #600
         mov x2, #249
@@ -410,6 +616,7 @@ draw_casa_bob:
         mov x3, #605
         mov x4, #270
         bl draw_line
+
     // ANANA
         movz x0, 0x0005, lsl #16  // Color
 	    movk x0, 0x100A, lsl #0
@@ -486,7 +693,6 @@ draw_casa_bob:
 	    bl draw_parallelogram
 
 
-
         movz x0, 0xe0, lsl #16  // Color: #e06903 <- casa de bob
 	    movk x0, 0x690e, lsl #0
 
@@ -507,7 +713,6 @@ draw_casa_bob:
 	    mov x6, #-30           // vy
 	    bl draw_parallelogram
 
-
         mov x1, #458           // x0: coordenada x inicial
 	    mov x2, #359           // y0: coordenada y inicial 
 	    mov x3, #130           // ux: vector u 
@@ -523,7 +728,6 @@ draw_casa_bob:
 	    mov x5, #6          // vx: vector v 
 	    mov x6, #-30           // vy
 	    bl draw_parallelogram
-
 
         mov x1, #452           // x0: coordenada x inicial
 	    mov x2, #329           // y0: coordenada y inicial 
@@ -541,7 +745,6 @@ draw_casa_bob:
 	    mov x6, #-30           // vy
 	    bl draw_parallelogram
 
-
         mov x1, #450           // x0: coordenada x inicial
 	    mov x2, #299           // y0: coordenada y inicial 
 	    mov x3, #130           // ux: vector u 
@@ -557,7 +760,6 @@ draw_casa_bob:
 	    mov x5, #-3          // vx: vector v 
 	    mov x6, #-30           // vy
 	    bl draw_parallelogram
-
 
         mov x1, #453           // x0: coordenada x inicial
 	    mov x2, #269           // y0: coordenada y inicial
