@@ -140,10 +140,42 @@ draw_gary:
     // OJOS.
     movz x0, #0xf6, lsl #16
     movk x0, #0xff00, lsl #0
-    add x3, x23, #30
+    add x3, x23, #29
     sub x4, x24, #24
     mov x5, #5
     bl draw_fill_circle
+
+    add x3, x23, #44
+    sub x4, x24, #24
+    bl draw_fill_circle
+
+    // Iris.
+    movz x0, #0xff, lsl #16
+    movk x0, #0x8d31, lsl #0
+    add x3, x23, #31
+    sub x4, x24, #25
+    mov x5, #3
+    bl draw_fill_circle
+
+    add x3, x23, #46
+    sub x4, x24, #25
+    mov x5, #3
+    bl draw_fill_circle
+
+    // Pupilas
+    movz x0, #0x00, lsl #0
+    add x1, x23, #31
+    sub x2, x24, #26
+    add x3, x23, #33
+    sub x4, x24, #24
+    bl draw_rectangle
+
+    add x1, x23, #46
+    sub x2, x24, #26
+    add x3, x23, #48
+    sub x4, x24, #24
+    bl draw_rectangle
+
 
     ldr lr, [sp], #8
     ldp x23, x24, [sp], #16
