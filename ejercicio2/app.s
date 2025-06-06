@@ -121,7 +121,11 @@ restore_pos:
 
 
 	//GARY
-	//bl draw_gary
+	stp x23, x24, [sp, #-16]!
+	mov x23, #50
+	mov x24, #465
+	bl draw_gary
+	ldp x23, x24, [sp], #16
 
 	//BURBUJAS
 	mov x3, #607
@@ -167,9 +171,12 @@ restore_pos:
 	cmp x19, xzr
 	b.le restore_pos
 
+
+/*
 	cmp x8, #100
 	b.ge inf_loop
-	add x8, x8, #1	//actualiza contador
+ 	add x8, x8, #1	//actualiza contador
+ */
 
 	// DELAY
 	mov x9, #2
