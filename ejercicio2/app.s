@@ -84,12 +84,19 @@ main:
 	//x0 contiene la direccion base del framebuffer
  	mov x28, x0	// Guarda la dirección base del framebuffer en x28
 	
+	//inicializo frame_counter (en x8)
+	mov x8, #0
+
 restore_pos:
 	//POSICIONES INICIALES BURBUJAS
-	mov x19, #200	//y_bubble1
-	mov x20, #186	//y_bubble2
-	mov x21, #178	//y_bubble3
-	mov x22, #165	//y_bubble4
+	mov x19, #212	//y_bubble1
+	mov x20, #235	//y_bubble2
+	mov x21, #240	//y_bubble3
+	mov x22, #230	//y_bubble4
+	mov x23, #220	//y_bubble5
+	mov x24, #253	//y_bubble6
+
+
 
 	animation_loop:
 
@@ -103,7 +110,6 @@ restore_pos:
 	//-----------------------------------
 
 	
-
 	bl draw_sand
 	bl draw_road
 	bl draw_odc_sign
@@ -111,42 +117,67 @@ restore_pos:
 
 	bl draw_casa_calamardo
 	bl draw_casa_patricio
+	bl draw_casa_bob
 
-	// EJEMPLO BURBUJAS
+
+	//GARY
+	//bl draw_gary
+
+	//BURBUJAS
 	mov x3, #607
-	mov x4, x19
+	mov x4, x24
+	mov x5, #10
+	bl draw_bubble
+	mov x3, #612
+	mov x4, x23
+	mov x5, #9
+	bl draw_bubble
+	mov x3, #607
+	mov x4, x22
 	mov x5, #8
+	bl draw_bubble
+	mov x3, #604
+	mov x4, x21
+	mov x5, #7
 	bl draw_bubble
 	mov x3, #615
 	mov x4, x20
 	mov x5, #7
 	bl draw_bubble
-	mov x3, #603
-	mov x4, x21
+	mov x3, #611
+	mov x4, x19
 	mov x5, #6
 	bl draw_bubble
-	mov x3, #607
-	mov x4, x22
-	mov x5, #9
-	bl draw_bubble
 
+	bl draw_casa_bob
 
 	mov x3, #16
 	mov x4, #430
 	mov x5, #15
 	//bl draw_medusa
 	
-	bl draw_casa_bob
+	sub x19, x19, #2	//r=6
+	sub x20, x20, #3	//r=7
+	sub x21, x21, #4	//r=7
+	sub x22, x22, #3	//r=8
+	sub x23, x23, #4	//r=9
+	sub x24, x24, #3	//r=10
 
-	sub x19, x19, #6
-	sub x20, x20, #2
-	sub x21, x21, #3
-	sub x22, x22, #4
-
+	// Reinicia posicion de burbujas
 	cmp x19, xzr
 	b.le restore_pos
 
-	mov x9, #10
-	bl delay
+	cmp x8, #100
+	b.ge inf_loop
+	add x8, x8, #1	//actualiza contador
 
+	// DELAY
+	mov x9, #2
+	bl delay
 	b animation_loop
+
+
+	// INFINITE LOOP
+	inf_loop:
+		b inf_loop
+		
