@@ -1,11 +1,11 @@
-	.include "constants.s"
+.include "constants.s"
 	.globl main
 
 
 /*  MAIN DE EJEMPLO ANIMACION (GONZA)
 	main:
-		// x0 contiene la dirección base del framebuffer
-		mov x20, x0		// Guarda la dirección base del framebuffer en x20
+		// x0 contiene la direccion base del framebuffer
+		mov x20, x0		// Guarda la direccion base del framebuffer en x20
 		mov x28, x20	// Configura x28 para las funciones de utils.s
 
 		// Definir colores
@@ -52,7 +52,7 @@
 		mov x5, #10
 		bl draw_fill_circle
 
-		// Actualizar la posición y de cada circulo
+		// Actualizar la posicion y de cada circulo
 		sub x21, x21, #2  // Mover primer circulo hacia arriba
 		cmp x21, #0
 		b.ge no_reset1
@@ -81,39 +81,34 @@
 
 
 main:
-	//x0 contiene la direccion base del framebuffer
- 	mov x28, x0	// Guarda la dirección base del framebuffer en x28
+	// x0 contiene la direccion base del framebuffer
+	mov x28, x0	// Guarda la direccion base del framebuffer en x28
 	
-	//inicializo frame_counter (en x8)
-	mov x8, #0
-	
-	// POSICIÓN INICAL GARY
-	mov x25, #50
-	mov x26, #465
-restore_pos_burbujas:
-	//POSICIONES INICIALES BURBUJAS
-	mov x19, #212	//y_bubble1
-	mov x20, #235	//y_bubble2
-	mov x21, #240	//y_bubble3
-	mov x22, #230	//y_bubble4
-	mov x23, #220	//y_bubble5
-	mov x24, #253	//y_bubble6
+	// POSICION INICIAL MEDUSA (solo se inicializa una vez)
+	mov x25, #25	// x_medusa
+	mov x26, #430	// y_medusa
 
+	// POSICION INICIAL GARY (solo se inicializa una vez)
+	mov x23, #18	// x_gary
+	mov x24, #467	// y_gary
 
+restore_pos:
+	// POSICIONES INICIALES BURBUJAS
+	mov x19, #200	// y_bubble1
+	mov x20, #186	// y_bubble2
+	mov x21, #178	// y_bubble3
+	mov x22, #165	// y_bubble4
 
-
-	animation_loop:
-
+animation_loop:
 	// BACKGROUND ----------------------
 	movz x0, 0x40, lsl #16  // #40d0cf
-    movk x0, 0xD0CF, lsl #0
+	movk x0, 0xD0CF, lsl #0
 	movz x1, 0x17, lsl #16	// #176cd6
-    movk x1, 0x6CD6, lsl #0
+	movk x1, 0x6CD6, lsl #0
 	bl background_gradient
 	bl draw_flower
 	//-----------------------------------
 
-	
 	bl draw_sand
 	bl draw_road
 	bl draw_odc_sign
@@ -121,72 +116,87 @@ restore_pos_burbujas:
 
 	bl draw_casa_calamardo
 	bl draw_casa_patricio
-	bl draw_casa_bob
 
-
-	//GARY
-	bl draw_gary
-
-	//BURBUJAS
+	// DIBUJAR BURBUJAS
 	mov x3, #607
-	mov x4, x24
-	mov x5, #10
-	bl draw_bubble
-	mov x3, #612
-	mov x4, x23
-	mov x5, #9
-	bl draw_bubble
-	mov x3, #607
-	mov x4, x22
+	mov x4, x19
+
 	mov x5, #8
-	bl draw_bubble
-	mov x3, #604
-	mov x4, x21
-	mov x5, #7
 	bl draw_bubble
 	mov x3, #615
 	mov x4, x20
 	mov x5, #7
 	bl draw_bubble
-	mov x3, #611
-	mov x4, x19
+	mov x3, #603
+	mov x4, x21
 	mov x5, #6
 	bl draw_bubble
+	mov x3, #607
+	mov x4, x22
+	mov x5, #9
+	bl draw_bubble
+
+	// DIBUJAR MEDUSA
+	mov x3, x25
+	mov x4, x26
+	mov x5, #15
+	bl draw_medusa
+
+	// Guardar x25 y x26 antes de dibujar Gary
+	stp x25, x26, [sp, #-16]!
+
+	// DIBUJAR GARY
+	mov x25, x23    // Pasar x_gary a x25 para draw_gary
+	mov x26, x24    // Pasar y_gary a x26 para draw_gary
+	bl draw_gary
+
+	// Restaurar x25 y x26 despues de dibujar Gary
+	ldp x25, x26, [sp], #16
 
 	bl draw_casa_bob
 
-	mov x3, #16
-	mov x4, #430
-	mov x5, #15
-	//bl draw_medusa
-	
-	sub x19, x19, #8	//r=6
-	sub x20, x20, #12	//r=7
-	sub x21, x21, #16	//r=7
-	sub x22, x22, #12	//r=8
-	sub x23, x23, #16	//r=9
-	sub x24, x24, #12	//r=10
+	// ACTUALIZAR POSICIONES BURBUJAS
+	sub x19, x19, #6
+	sub x20, x20, #2
+	sub x21, x21, #3
+	sub x22, x22, #4
 
-	add x25, x25, #12
+	// ACTUALIZAR POSICION MEDUSA
+	add x25, x25, #2   // mover 2 en x
+	sub x26, x26, #1   // mover -1 en y
 
-	// Reinicia posicion de burbujas
-	cmp x19, xzr
-	b.le restore_pos_burbujas
+	// ACTUALIZAR POSICION GARY
+	add x23, x23, #2   // mover 2 en x hacia la derecha
 
+	// VERIFICAR REINICIO BURBUJAS
+	cmp x19, #0
+	b.le restore_pos
 
-/*
-	cmp x8, #100
-	b.ge inf_loop
- 	add x8, x8, #1	//actualiza contador
- */
+	// VERIFICAR REINICIO MEDUSA
+	cmp x25, #639
+	b.gt reset_medusa
+	cmp x26, #15
+	b.lt reset_medusa
+	b check_gary
 
-	// DELAY
-	mov x9, #20
+reset_medusa:
+	mov x25, #25    // Reiniciar a la posicion inicial consistente
+	mov x26, #430
+	b check_gary
+
+check_gary:
+	// VERIFICAR REINICIO GARY
+	cmp x23, #639   // Si x_gary > 639, reiniciar
+	b.gt reset_gary
+	b continue_animation
+
+reset_gary:
+	mov x23, #18    // Reiniciar x_gary a la posicion inicial
+	b continue_animation
+
+continue_animation:
+	mov x9, #7
 	bl delay
+
 	b animation_loop
-
-
-	// INFINITE LOOP
-	inf_loop:
-		b inf_loop
 		

@@ -33,20 +33,51 @@ draw_bubble:
     ret
 
 draw_medusa:
-    str x30, [sp, #-8]!
-    mov x19, x3
-    mov x20, x4
-    movz x0, 0xDB, lsl #16  // Color: #DB83D3
-	movk x0, 0x83D3, lsl #0
+    str x30, [sp, #-8]!        // Guardar el registro de retorno
+    stp x19, x20, [sp, #-16]!  // Guardar x19 y x20 para preservar xc e yc
+
+    // Dibujar el cuerpo (semicirculo relleno orientado hacia arriba)
+    movz x0, 0xDB, lsl #16     // Color del cuerpo: #DB83D3
+    movk x0, 0x83D3, lsl #0
+    // x3 = xc, x4 = yc, x5 = radio ya estan configurados desde la llamada
     bl draw_fill_semi_circle
-    mov x0, x19
-    mov x1, x20
-    
-// guardar x19
+
+    // Guardar las coordenadas del centro (xc, yc) para los tentaculos
+    mov x19, x3                // xc
+    mov x20, x4                // yc
+
+    // Dibujar tentaculo 1 (izquierda)
+    movz x0, 0xFF, lsl #16     // Color de los tentaculos: #FF69B4
+    movk x0, 0x69B4, lsl #0
+    sub x1, x19, #15           // x_inicio = xc - 15
+    add x2, x20, #10           // y_inicio = yc + 10
+    sub x3, x19, #20           // x_fin = xc - 20
+    add x4, x20, #30           // y_fin = yc + 30
+    bl draw_line
+
+    // Dibujar tentaculo 2 (centro)
+    movz x0, 0xFF, lsl #16     // Color: #FF69B4
+    movk x0, 0x69B4, lsl #0
+    sub x1, x19, #10           // x_inicio = xc - 10
+    add x2, x20, #10           // y_inicio = yc + 10
+    sub x3, x19, #10           // x_fin = xc - 10
+    add x4, x20, #30           // y_fin = yc + 30
+    bl draw_line
+
+    // Dibujar tentaculo 3 (derecha)
+    movz x0, 0xFF, lsl #16     // Color: #FF69B4
+    movk x0, 0x69B4, lsl #0
+    sub x1, x19, #5            // x_inicio = xc - 5
+    add x2, x20, #10           // y_inicio = yc + 10
+    mov x3, x19                // x_fin = xc
+    add x4, x20, #30           // y_fin = yc + 30
+    bl draw_line
+
+    ldp x19, x20, [sp], #16    // Restaurar x19 y x20
+    ldr x30, [sp], #8          // Restaurar el registro de retorno
+    ret
 
     
-    ldr x30, [sp], #8
-    ret
 /*
     draw_gary: Dibuja a Gary parametrizado. Con centro (x,y) donde x = x25; y = x26.
 */
