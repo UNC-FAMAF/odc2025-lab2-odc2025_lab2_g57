@@ -176,7 +176,6 @@ draw_gary:
     sub x4, x24, #24
     bl draw_rectangle
 
-
-    ldr lr, [sp], #8
     ldp x23, x24, [sp], #16
+    ldr lr, [sp], #8
     ret
