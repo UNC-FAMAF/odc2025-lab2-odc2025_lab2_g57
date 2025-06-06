@@ -1,5 +1,6 @@
     .globl draw_bubble
     .globl draw_medusa
+    .global draw_gary
 
 
 /* draw_bubble: dibuja una burbuja parametrizada, 
@@ -45,4 +46,105 @@ draw_medusa:
 
     
     ldr x30, [sp], #8
+    ret
+/*
+    draw_gary: Dibuja a Gary parametrizado. Con centro (x,y) donde x = x23; y = x24.
+*/
+draw_gary:
+    str lr, [sp, #-8]!
+    stp x23, x24, [sp, #-16]!
+    /* Coordenadas iniciales del centro: (x23,x24) = (18,467) */
+    // Caracola.
+    movz x0, #0xff, lsl #16
+    movk x0, #0x8ea4, lsl #0
+    add x3, x23, #12
+    sub x4, x24, #13
+    mov x5, #15
+    bl draw_fill_circle
+
+    // Dibujo el cuerpo de gary.
+    movz x0, #0xf6, lsl #16
+    movk x0, #0xff00, lsl #0
+    sub x1, x23, #2
+    mov x2, x24
+    add x3, x23, #37
+    add x4, x24, #2
+    bl draw_rectangle
+
+    movz x0, #0x8b, lsl #16
+    movk x0, #0xc7eb, lsl #0
+    mov x1, x23
+    sub x2, x24, #3
+    add x3, x23, #39
+    sub x4, x24, #1
+    bl draw_rectangle
+
+    movz x0, #0x8b, lsl #16
+    movk x0, #0xc7eb, lsl #0
+    add x1, x23, #25
+    sub x2, x24, #5
+    add x3, x23, #41
+    sub x4, x24, #4
+    bl draw_rectangle
+
+    movz x0, #0x8b, lsl #16
+    movk x0, #0xc7eb, lsl #0
+    add x1, x23, #27
+    sub x2, x24, #6
+    add x3, x23, #44
+    sub x4, x24, #6
+    bl draw_rectangle
+
+    // Parte boca.
+    movz x0, #0x5a, lsl #16
+    movk x0, #0x0b15, lsl #0
+    add x1, x23, #31
+    sub x2, x24, #3
+    add x3, x23, #35
+    sub x4, x24, #1
+    bl draw_rectangle
+
+    add x1, x23, #32
+    sub x2, x24, #5
+    add x3, x23, #37
+    sub x4, x24, #4
+    bl draw_rectangle
+
+    // Parte ojos.
+    movz x0, #0x8b, lsl #16
+    movk x0, #0xc7eb, lsl #0
+    add x1, x23, #30
+    sub x2, x24, #19
+    add x3, x23, #32
+    sub x4, x24, #6
+    bl draw_line
+
+    add x1, x23, #31
+    sub x2, x24, #19
+    add x3, x23, #33
+    sub x4, x24, #6
+    bl draw_line
+
+    add x1, x23, #39
+    sub x2, x24, #6
+    add x3, x23, #41
+    sub x4, x24, #19
+    bl draw_line
+
+    add x1, x23, #40
+    sub x2, x24, #6
+    add x3, x23, #42
+    sub x4, x24, #19
+    bl draw_line
+
+    // OJOS.
+    movz x0, #0xf6, lsl #16
+    movk x0, #0xff00, lsl #0
+    add x3, x23, #30
+    sub x4, x24, #24
+    mov x5, #5
+    bl draw_fill_circle
+
+    ldr lr, [sp], #8
+    ldp x23, x24, [sp], #16
     ret
