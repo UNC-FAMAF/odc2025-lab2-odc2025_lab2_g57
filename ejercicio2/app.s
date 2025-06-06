@@ -83,7 +83,12 @@
 main:
 	//x0 contiene la direccion base del framebuffer
  	mov x28, x0	// Guarda la dirección base del framebuffer en x28
-
+restore_pos:
+	//POSICIONES INICIALES BURBUJAS
+	mov x19, #200	//y_bubble1
+	mov x20, #186	//y_bubble2
+	mov x21, #178	//y_bubble3
+	mov x22, #165	//y_bubble4
 
 	animation_loop:
 
@@ -108,27 +113,38 @@ main:
 
 	// EJEMPLO BURBUJAS
 	mov x3, #607
-	mov x4, #202
+	mov x4, x19
 	mov x5, #8
 	bl draw_bubble
 	mov x3, #615
-	mov x4, #186
+	mov x4, x20
 	mov x5, #7
 	bl draw_bubble
 	mov x3, #603
-	mov x4, #178
+	mov x4, x21
 	mov x5, #6
 	bl draw_bubble
 	mov x3, #607
-	mov x4, #165
+	mov x4, x22
 	mov x5, #9
 	bl draw_bubble
 
+
+	mov x3, #16
+	mov x4, #430
+	mov x5, #15
+	bl draw_medusa
+	
 	bl draw_casa_bob
 
+	sub x19, x19, #10
+	sub x20, x20, #10
+	sub x21, x21, #10
+	sub x22, x22, #10
 
+	cbz x19, restore_pos
 
-	//---------------------------------------------------------------
-	// Infinite Loopgi
-	InfLoop:
-		b InfLoop
+	movz x9, #300
+	bl delay
+
+	b animation_loop

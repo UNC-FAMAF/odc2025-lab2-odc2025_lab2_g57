@@ -1,4 +1,5 @@
     .globl draw_bubble
+    .globl draw_medusa
 
 
 /* draw_bubble: dibuja una burbuja parametrizada, 
@@ -28,4 +29,20 @@ draw_bubble:
     bl draw_fill_circle
     
     ldr x30, [sp], #8
-    ret         
+    ret
+
+draw_medusa:
+    str x30, [sp, #-8]!
+    mov x19, x3
+    mov x20, x4
+    movz x0, 0xDB, lsl #16  // Color: #DB83D3
+	movk x0, 0x83D3, lsl #0
+    bl draw_fill_semi_circle
+    mov x0, x19
+    mov x1, x20
+    
+// guardar x19
+
+    
+    ldr x30, [sp], #8
+    ret

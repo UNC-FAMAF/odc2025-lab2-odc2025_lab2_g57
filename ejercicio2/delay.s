@@ -1,16 +1,18 @@
 .global delay
+.equ INNER_LOOP_ITERATIONS, 0x0f000000
 
 
 /*  Función delay: Crea un retardo basado en el valor de x8
-    Inputs: x8 - numero de iteraciones para el retardo
+    Inputs: x9 - numero de iteraciones para el retardo
     Outputs: None
-    Temporales: x9
+    Temporales: x10
 */
 delay:
-    str lr, [sp, #-8]!      // Guardar lr en la pila
-    mov x9, x8              // Copiar x8 a x9 para usarlo como contador
+    cbz x9, end_delay
+    mov x10, INNER_LOOP_ITERATIONS
 delay_loop:
-    subs x9, x9, #1         // Decrementar x9 y actualizar flags
-    b.ne delay_loop         // Si x9 no es cero, volver a delay_loop
-    ldr lr, [sp], #8        // Restaurar lr y ajustar la pila
+    subs x10, x10, #1
+    b.ne delay_loop
+    sub x9, x9, #1
+end_delay:
     ret
