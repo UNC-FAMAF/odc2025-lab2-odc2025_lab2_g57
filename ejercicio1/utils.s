@@ -477,12 +477,10 @@ draw_fill_semi_circle:
 
 draw_rectangle:
     // Guardar registros en la pila
-    sub sp, sp, #64         // Reservar espacio para variables locales y registros
-    stp x29, x30, [sp, #0]  // Guardar FP y LR
-    mov x29, sp             // Actualizar FP
-    stp x19, x20, [sp, #16] // Guardar registros temporales
-    stp x21, x22, [sp, #32] // Guardar más registros
-    stp x23, x24, [sp, #48] // Guardar más registros
+    stp x19, x20, [sp, #-16]!
+    stp x21, x22, [sp, #-16]!
+    stp x23, x24, [sp, #-16]!
+    stp x25, x30, [sp, #-16]!
 
     // Copiar parámetros a registros temporales
     mov x19, x0             // x19 = color
@@ -520,11 +518,10 @@ draw_rectangle:
     ._end_outer_loop:
 
     // Restaurar registros y pila
-    ldp x19, x20, [sp, #16] // Restaurar x19, x20
-    ldp x21, x22, [sp, #32] // Restaurar x21, x22
-    ldp x23, x24, [sp, #48] // Restaurar x23, x24
-    ldp x29, x30, [sp, #0]  // Restaurar FP y LR
-    add sp, sp, #64         // Liberar espacio en la pila
+    ldp x25, x30, [sp], #16
+    ldp x23, x24, [sp], #16
+    ldp x21, x22, [sp], #16
+    ldp x19, x20, [sp], #16
     ret
 
 /*  Function: draw_semi_circle
@@ -541,13 +538,12 @@ draw_rectangle:
     Registros modificados: Ninguno aparte de los temporales.
 */
 draw_semi_circle:
-    // Guardar los registros y reservar espacio en la pila
-    sub sp, sp, #64
-    stp x29, x30, [sp, #0]
-    mov x29, sp             
-    stp x19, x20, [sp, #16]
-    stp x21, x22, [sp, #32]
-    stp x23, x24, [sp, #48]
+    // Guardar los registros y reservar espacio en la pila   
+    stp x19, x20, [sp, #-16]!
+    stp x21, x22, [sp, #-16]!
+    stp x23, x24, [sp, #-16]!
+    stp x25, x26, [sp, #-16]!
+    str x30, [sp, #-8]!    
     // Copiar los parámetros a registros temporales
     mov x19, x0             // x19 = color
     mov x20, x1             // x20 = x_center
@@ -679,11 +675,11 @@ draw_semi_circle:
     ._end_semi_circle:
 
     // Restaurar los registros y pila
-    ldp x19, x20, [sp, #16]
-    ldp x21, x22, [sp, #32]
-    ldp x23, x24, [sp, #48]
-    ldp x29, x30, [sp, #0]
-    add sp, sp, #64
+    ldr x30, [sp], #8
+    ldp x25, x26, [sp], #16
+    ldp x23, x24, [sp], #16
+    ldp x21, x22, [sp], #16
+    ldp x19, x20, [sp], #16
     ret
 
 
@@ -704,6 +700,9 @@ draw_semi_circle:
     Registros modificados: ninguno aparte de los temporales
 */
 draw_parallelogram:
+    stp x19, x20, [sp, #-16]!
+    stp x21, x22, [sp, #-16]!
+    str x23, [sp, #-8]!
     // Guardar registros en la pila
     sub sp, sp, #128
     stp x29, x30, [sp, #0]
@@ -715,6 +714,8 @@ draw_parallelogram:
     str x4, [x29, #48]
     str x5, [x29, #56]
     str x6, [x29, #64]
+
+
 
     // Calcular los vertices del paralelogramo
     // A = (x0, y0)
@@ -854,6 +855,10 @@ draw_parallelogram:
     // Restaurar registros y pila
     ldp x29, x30, [sp, #0]  // Restaurar FP y LR
     add sp, sp, #128        // Liberar espacio en la pila
+
+    ldr x23, [sp], #8
+    ldp x21, x22, [sp], #16
+    ldp x19, x20, [sp], #16
     ret
 
 /*  Subrutina auxiliar: check_intersection
