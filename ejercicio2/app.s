@@ -83,6 +83,7 @@
 main:
 	//x0 contiene la direccion base del framebuffer
  	mov x28, x0	// Guarda la dirección base del framebuffer en x28
+	
 restore_pos:
 	//POSICIONES INICIALES BURBUJAS
 	mov x19, #200	//y_bubble1
@@ -133,18 +134,19 @@ restore_pos:
 	mov x3, #16
 	mov x4, #430
 	mov x5, #15
-	bl draw_medusa
+	//bl draw_medusa
 	
 	bl draw_casa_bob
 
-	sub x19, x19, #10
-	sub x20, x20, #10
-	sub x21, x21, #10
-	sub x22, x22, #10
+	sub x19, x19, #6
+	sub x20, x20, #2
+	sub x21, x21, #3
+	sub x22, x22, #4
 
-	cbz x19, restore_pos
+	cmp x19, xzr
+	b.le restore_pos
 
-	movz x9, #300
+	mov x9, #10
 	bl delay
 
 	b animation_loop

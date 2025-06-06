@@ -1,5 +1,5 @@
 .global delay
-.equ INNER_LOOP_ITERATIONS, 0x0f000000
+.equ INNER_LOOP_ITERATIONS, 0x0f00000
 
 
 /*  Función delay: Crea un retardo basado en el valor de x8
@@ -14,5 +14,7 @@ delay_loop:
     subs x10, x10, #1
     b.ne delay_loop
     sub x9, x9, #1
+    b delay
 end_delay:
     ret
+    
