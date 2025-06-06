@@ -48,134 +48,134 @@ draw_medusa:
     ldr x30, [sp], #8
     ret
 /*
-    draw_gary: Dibuja a Gary parametrizado. Con centro (x,y) donde x = x23; y = x24.
+    draw_gary: Dibuja a Gary parametrizado. Con centro (x,y) donde x = x25; y = x26.
 */
 draw_gary:
     str lr, [sp, #-8]!
-    stp x23, x24, [sp, #-16]!
-    /* Coordenadas iniciales del centro: (x23,x24) = (18,467) */
+    stp x25, x26, [sp, #-16]!
+    /* Coordenadas iniciales del centro: (x25,x26) = (18,467) */
     // Caracola.
     movz x0, #0xff, lsl #16
     movk x0, #0x8ea4, lsl #0
-    add x3, x23, #12
-    sub x4, x24, #13
+    add x3, x25, #12
+    sub x4, x26, #13
     mov x5, #15
     bl draw_fill_circle
 
     // Dibujo el cuerpo de gary.
     movz x0, #0xf6, lsl #16
     movk x0, #0xff00, lsl #0
-    sub x1, x23, #2
-    mov x2, x24
-    add x3, x23, #37
-    add x4, x24, #2
+    sub x1, x25, #2
+    mov x2, x26
+    add x3, x25, #37
+    add x4, x26, #2
     bl draw_rectangle
 
     movz x0, #0x8b, lsl #16
     movk x0, #0xc7eb, lsl #0
-    mov x1, x23
-    sub x2, x24, #3
-    add x3, x23, #39
-    sub x4, x24, #1
+    mov x1, x25
+    sub x2, x26, #3
+    add x3, x25, #39
+    sub x4, x26, #1
     bl draw_rectangle
 
     movz x0, #0x8b, lsl #16
     movk x0, #0xc7eb, lsl #0
-    add x1, x23, #25
-    sub x2, x24, #5
-    add x3, x23, #41
-    sub x4, x24, #4
+    add x1, x25, #25
+    sub x2, x26, #5
+    add x3, x25, #41
+    sub x4, x26, #4
     bl draw_rectangle
 
     movz x0, #0x8b, lsl #16
     movk x0, #0xc7eb, lsl #0
-    add x1, x23, #27
-    sub x2, x24, #6
-    add x3, x23, #44
-    sub x4, x24, #6
+    add x1, x25, #27
+    sub x2, x26, #6
+    add x3, x25, #44
+    sub x4, x26, #6
     bl draw_rectangle
 
     // Parte boca.
     movz x0, #0x5a, lsl #16
     movk x0, #0x0b15, lsl #0
-    add x1, x23, #31
-    sub x2, x24, #3
-    add x3, x23, #35
-    sub x4, x24, #1
+    add x1, x25, #31
+    sub x2, x26, #3
+    add x3, x25, #35
+    sub x4, x26, #1
     bl draw_rectangle
 
-    add x1, x23, #32
-    sub x2, x24, #5
-    add x3, x23, #37
-    sub x4, x24, #4
+    add x1, x25, #32
+    sub x2, x26, #5
+    add x3, x25, #37
+    sub x4, x26, #4
     bl draw_rectangle
 
     // Parte ojos.
     movz x0, #0x8b, lsl #16
     movk x0, #0xc7eb, lsl #0
-    add x1, x23, #30
-    sub x2, x24, #19
-    add x3, x23, #32
-    sub x4, x24, #6
+    add x1, x25, #30
+    sub x2, x26, #19
+    add x3, x25, #32
+    sub x4, x26, #6
     bl draw_line
 
-    add x1, x23, #31
-    sub x2, x24, #19
-    add x3, x23, #33
-    sub x4, x24, #6
+    add x1, x25, #31
+    sub x2, x26, #19
+    add x3, x25, #33
+    sub x4, x26, #6
     bl draw_line
 
-    add x1, x23, #39
-    sub x2, x24, #6
-    add x3, x23, #41
-    sub x4, x24, #19
+    add x1, x25, #39
+    sub x2, x26, #6
+    add x3, x25, #41
+    sub x4, x26, #19
     bl draw_line
 
-    add x1, x23, #40
-    sub x2, x24, #6
-    add x3, x23, #42
-    sub x4, x24, #19
+    add x1, x25, #40
+    sub x2, x26, #6
+    add x3, x25, #42
+    sub x4, x26, #19
     bl draw_line
 
     // OJOS.
     movz x0, #0xf6, lsl #16
     movk x0, #0xff00, lsl #0
-    add x3, x23, #29
-    sub x4, x24, #24
+    add x3, x25, #29
+    sub x4, x26, #24
     mov x5, #5
     bl draw_fill_circle
 
-    add x3, x23, #44
-    sub x4, x24, #24
+    add x3, x25, #44
+    sub x4, x26, #24
     bl draw_fill_circle
 
     // Iris.
     movz x0, #0xff, lsl #16
     movk x0, #0x8d31, lsl #0
-    add x3, x23, #31
-    sub x4, x24, #25
+    add x3, x25, #31
+    sub x4, x26, #25
     mov x5, #3
     bl draw_fill_circle
 
-    add x3, x23, #46
-    sub x4, x24, #25
+    add x3, x25, #46
+    sub x4, x26, #25
     mov x5, #3
     bl draw_fill_circle
 
     // Pupilas
     movz x0, #0x00, lsl #0
-    add x1, x23, #31
-    sub x2, x24, #26
-    add x3, x23, #33
-    sub x4, x24, #24
+    add x1, x25, #31
+    sub x2, x26, #26
+    add x3, x25, #33
+    sub x4, x26, #24
     bl draw_rectangle
 
-    add x1, x23, #46
-    sub x2, x24, #26
-    add x3, x23, #48
-    sub x4, x24, #24
+    add x1, x25, #46
+    sub x2, x26, #26
+    add x3, x25, #48
+    sub x4, x26, #24
     bl draw_rectangle
 
-    ldp x23, x24, [sp], #16
+    ldp x25, x26, [sp], #16
     ldr lr, [sp], #8
     ret

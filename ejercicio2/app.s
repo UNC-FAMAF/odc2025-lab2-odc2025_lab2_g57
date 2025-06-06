@@ -86,8 +86,11 @@ main:
 	
 	//inicializo frame_counter (en x8)
 	mov x8, #0
-
-restore_pos:
+	
+	// POSICIÓN INICAL GARY
+	mov x25, #50
+	mov x26, #465
+restore_pos_burbujas:
 	//POSICIONES INICIALES BURBUJAS
 	mov x19, #212	//y_bubble1
 	mov x20, #235	//y_bubble2
@@ -95,6 +98,7 @@ restore_pos:
 	mov x22, #230	//y_bubble4
 	mov x23, #220	//y_bubble5
 	mov x24, #253	//y_bubble6
+
 
 
 
@@ -121,11 +125,7 @@ restore_pos:
 
 
 	//GARY
-	stp x23, x24, [sp, #-16]!
-	mov x23, #50
-	mov x24, #465
 	bl draw_gary
-	ldp x23, x24, [sp], #16
 
 	//BURBUJAS
 	mov x3, #607
@@ -160,16 +160,18 @@ restore_pos:
 	mov x5, #15
 	//bl draw_medusa
 	
-	sub x19, x19, #2	//r=6
-	sub x20, x20, #3	//r=7
-	sub x21, x21, #4	//r=7
-	sub x22, x22, #3	//r=8
-	sub x23, x23, #4	//r=9
-	sub x24, x24, #3	//r=10
+	sub x19, x19, #8	//r=6
+	sub x20, x20, #12	//r=7
+	sub x21, x21, #16	//r=7
+	sub x22, x22, #12	//r=8
+	sub x23, x23, #16	//r=9
+	sub x24, x24, #12	//r=10
+
+	add x25, x25, #12
 
 	// Reinicia posicion de burbujas
 	cmp x19, xzr
-	b.le restore_pos
+	b.le restore_pos_burbujas
 
 
 /*
@@ -179,7 +181,7 @@ restore_pos:
  */
 
 	// DELAY
-	mov x9, #2
+	mov x9, #20
 	bl delay
 	b animation_loop
 
