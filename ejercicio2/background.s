@@ -64,7 +64,7 @@ background_gradient:
     // x2 es el contador de y, voy a iterar 260 veces porque el degradad llega hasta un poquito más de la mitad de la pantalla
     mov x2, #0
 ._loop_y:
-    cmp x2, SCREEN_HEIGH
+    cmp x2, #330
     b.ge ._background_done
 
     mov x3, SCREEN_WIDTH

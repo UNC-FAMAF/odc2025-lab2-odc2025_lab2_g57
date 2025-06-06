@@ -25,11 +25,8 @@
 draw_pixel:
     // Dirección del pixel (x,y) = Dirección de inicio del framebuffer + 4 * [x + (y * 640)]
     mov x15, SCREEN_WIDTH
-    mul x15, x2, x15
-    add x15, x1, x15
-    lsl x15, x15, #2
-    add x15, x28, x15
-    str w0, [x15]
+    madd x15, x2, x15, x1
+    str w0, [x28, x15, lsl #2]
     ret
 
 
@@ -40,8 +37,8 @@ draw_pixel:
         -x0: color
         -x1: coordenada x_0
         -x2: coordenada y_0
-        -x3: coordenada x_1
-        -x4: coordenada y_1
+        -x3: coordenada x_1 (no se modifica)
+        -x4: coordenada y_1 (no se modica)
     Outputs: ninguno
     Registros usados:
         - x7: usada para pasar argumento a abs y recibir su resultado  (no preservado)
@@ -119,6 +116,7 @@ draw_line:
     ldp x19, x20, [sp], #16
 
     ret
+
 
 /*  Function: draw_circle.
    Description: Dibuja un circulo (sin relleno) dadas sus coordenadas del centro (x,y), un radio y un color. 
@@ -368,6 +366,7 @@ draw_fill_circle:
         ldr x19, [sp], #8
     ret
 
+
 /*  Function: draw_fill_semi_circle.
    Description: Dibuja un semicirculo relleno (orientado hacia arriba) dadas sus coordenadas del centro (x,y), un radio y un color. 
                 'Midpoint Circle Algorithm'
@@ -523,6 +522,7 @@ draw_rectangle:
     ldp x21, x22, [sp], #16
     ldp x19, x20, [sp], #16
     ret
+
 
 /*  Function: draw_semi_circle
     Description: Dibuja un semicirculo en la pantalla dado su centro (x0, y0), radio r, y direccion.
@@ -905,20 +905,17 @@ draw_parallelogram:
     ldr x30, [sp], #16      // Restaurar LR
     ret
 
+
 /*  Function: abs
-    Description: Calcula el valor absoluto del registro x
+    Description: Calcula el valor absoluto del registro x7
     Inputs:
-        -x7: Número signado
-    Outputs: None
-    Registros usados:
-        -x19
+        - x7: Número signado
+    Outputs:
+        - x7
 */
 abs:
-    str x19, [sp, -8]!
-    cmp x7, #0           // Compara x7 con 0, actualiza flags
-    neg x19, x7           // x19 = -x7 (por si x7 < 0)
-    csel x7, x7, x19, GE  // si x7 >= 0 -> x7 = x7, si no -> x7 = -x7
-    ldr x19, [sp], 8
+    cmp x7, #0
+    cneg x7, x7, lt
     ret
 
     
