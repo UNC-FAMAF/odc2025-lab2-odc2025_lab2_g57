@@ -618,6 +618,12 @@ draw_road:
     mov x3, #431
     mov x4, #455
     bl draw_rectangle
+
+    mov x1, #432
+    mov x2, #451
+    mov x3, #449
+    mov x4, #453
+    bl draw_rectangle
     // parte derecha hasta camino bob
     mov x1, #516
     mov x2, #447
@@ -683,16 +689,18 @@ draw_road:
     bl  draw_parallelogram
 
     // Camino casa calamardo. #642f19
-    movz x0, #0x64, lsl 16
-    movk x0, #0x2f19, lsl 0
-    mov x1, #240
-    mov x2, #432
-    mov x3, #62
+    // Tablón 1
+    movz x0, #0x64, lsl #16
+    movk x0, #0x2f19, lsl #0
+    mov x1, #241
+    mov x2, #433
+    mov x3, #61
     mov x4, #0
-    mov x5, #-15
-    mov x6, #13
+    mov x5, #-14
+    mov x6, #12
     bl draw_parallelogram
 
+    //Tablón 2.
     movz x0, #0x64, lsl 16
     movk x0, #0x2f19, lsl 0
     mov x1, #264
@@ -701,17 +709,18 @@ draw_road:
     mov x4, #0
     mov x5, #-10
     mov x6, #10
-    bl draw_parallelogram    
+    bl draw_parallelogram
 
+    //Tablón 3.
     movz x0, #0x64, lsl 16
     movk x0, #0x2f19, lsl 0
-    mov x1, #288
+    mov x1, #289
     mov x2, #396
     mov x3, #40
     mov x4, #0
     mov x5, #-10
     mov x6, #10
-    bl draw_parallelogram  
+    bl draw_parallelogram
 
     // Rocas en la arena.
     movz x0, #0x18, lsl #16

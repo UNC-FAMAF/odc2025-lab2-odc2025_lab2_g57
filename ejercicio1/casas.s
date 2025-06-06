@@ -336,6 +336,15 @@ draw_casa_patricio:
     mov x6, #34
     bl draw_parallelogram
 
+    //Detalle contorno inferior.
+    movz x0, 0x0005, lsl #16
+    movk x0, 0x100A, lsl #0
+    mov x1, #22
+    mov x2, #389
+    mov x3, #183
+    mov x4, #390
+    bl draw_rectangle
+
     ldr x30, [sp], #8
     ret
 
@@ -1087,6 +1096,15 @@ draw_casa_bob:
         mov x3, #535
         mov x4, #375
         bl draw_line
+
+        //Detalles casa Bob
+        movz x0, 0x0005, lsl #16
+        movk x0, 0x100A, lsl #0
+        mov x1, #468
+        mov x2, #389
+        mov x3, #582
+        mov x4, #390
+        bl draw_rectangle
 
     ldr lr, [sp], #8
     ret
