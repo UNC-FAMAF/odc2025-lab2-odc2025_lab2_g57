@@ -8,7 +8,6 @@
     .globl draw_fill_circle
     .globl draw_parallelogram
     .globl draw_fill_semi_circle
-    .globl abs
     
 
 /*  RECORDAR QUE X28 = dirección base del framebuffer
@@ -41,7 +40,6 @@ draw_pixel:
         -x4: coordenada y_1 (no se modica)
     Outputs: ninguno
     Registros usados:
-        - x7: usada para pasar argumento a abs y recibir su resultado  (no preservado)
         - x19: dx
         - x20: dy
         - x21: err
@@ -56,13 +54,13 @@ draw_line:
     str x30, [sp, #-8]!
 
     // Hago los cálculos iniciales.
-    sub x7, x3, x1
-    bl abs
-    mov x19, x7
+    sub x19, x3, x1
+    cmp x19, #0
+    cneg x19, x19, lt
 
-    sub x7, x4, x2
-    bl abs
-    mov x20, x7
+    sub x20, x4, x2
+    cmp x20, #0
+    cneg x20, x20, lt
     neg x20, x20
 
     add x21, x19, x20
@@ -222,11 +220,13 @@ draw_circle:
                x12, x13 (auxiliares)
 */
 draw_fill_circle:
-    str x19, [sp, #-8]!
-    str x20, [sp, #-8]!
-    str x21, [sp, #-8]!
-    str x22, [sp, #-8]!
+    stp x19, x20, [sp, #-16]!
+    stp x21, x22, [sp, #-16]!
     str lr, [sp, #-8]!
+
+    // Guardar xc, yc en registros callee-saved para no perderlos
+    mov x19, x3
+    mov x20, x4
 
     mov x9, xzr                 // x=0
     sub x10, xzr, x5            // y=-r
@@ -256,114 +256,45 @@ draw_fill_circle:
             b ._fill_circle_draw
 
         ._fill_circle_draw:
-            // en x0 se almacena el color del circulo, por lo tanto tambien se usa para cada pixel
+            // en x0 se almacena el color del circulo, por lo tanto tambien se usa para cada línea
 
-            // pinto pixel en (xc+x, yc+y)
-            add x1, x3, x9
-            mov x19, x1
-            add x2, x4, x10
-            mov x20, x2
-            bl draw_pixel
-
-            // pinto pixel en (xc-x, yc+y)
-            sub x1, x3, x9
-            mov x21, x1
-            add x2, x4, x10
-            mov x22, x2
-            bl draw_pixel
-
-            // trazo una linea horizontal entre los puntos de la circunferencia con igual coordenada y
-            stp x3, x4, [sp, #-16]!
-            mov x1, x19   
-            mov x2, x20
-            mov x3, x21
-            mov x4, x22
+            // Línea 1: de (xc-x, yc+y) a (xc+x, yc+y)
+            sub x1, x19, x9             // x1 = xc - x (punto inicial)
+            add x2, x20, x10            // x2 = yc + y
+            add x3, x19, x9             // x3 = xc + x (punto final)
+            mov x4, x2                  // x4 = yc + y (misma y)
             bl draw_line
-            ldp x3, x4, [sp], #16
             
-
-
-            // pinto pixel en (xc+x, yc-y)
-            add x1, x3, x9
-            mov x19, x1
-            sub x2, x4, x10
-            mov x20, x2
-            bl draw_pixel
-
-            // pinto pixel en (xc-x, yc-y)
-            sub x1, x3, x9
-            mov x21, x1
-            sub x2, x4, x10
-            mov x22, x2
-            bl draw_pixel
-
-            // trazo una linea horizontal entre los puntos de la circunferencia con igual coordenada y
-            stp x3, x4, [sp, #-16]!
-            mov x1, x19   
-            mov x2, x20
-            mov x3, x21
-            mov x4, x22
+            // Línea 2: de (xc-x, yc-y) a (xc+x, yc-y)
+            sub x1, x19, x9             // x1 = xc - x (punto inicial)
+            sub x2, x20, x10            // x2 = yc - y
+            add x3, x19, x9             // x3 = xc + x (punto final)
+            mov x4, x2                  // x4 = yc - y (misma y)
             bl draw_line
-            ldp x3, x4, [sp], #16
-
-
-            // pinto pixel en (xc+y, yc+x)
-            add x1, x3, x10
-            mov x19, x1
-            add x2, x4, x9
-            mov x20, x2
-            bl draw_pixel
-
-            // pinto pixel en (xc-y, yc+x)
-            sub x1, x3, x10
-            mov x21, x1
-            add x2, x4, x9
-            mov x22, x2
-            bl draw_pixel
-
-            // trazo una linea horizontal entre los puntos de la circunferencia con igual coordenada y
-            stp x3, x4, [sp, #-16]!
-            mov x1, x19   
-            mov x2, x20
-            mov x3, x21
-            mov x4, x22
+            
+            // Línea 3: de (xc-y, yc+x) a (xc+y, yc+x)
+            sub x1, x19, x10            // x1 = xc - y (punto inicial)
+            add x2, x20, x9             // x2 = yc + x
+            add x3, x19, x10            // x3 = xc + y (punto final)
+            mov x4, x2                  // x4 = yc + x (misma y)
             bl draw_line
-            ldp x3, x4, [sp], #16
-
-
-            // pinto pixel en (xc+y, yc-x)
-            add x1, x3, x10
-            mov x19, x1
-            sub x2, x4, x9
-            mov x20, x2
-            bl draw_pixel
-
-            // pinto pixel en (xc-y, yc-x)
-            sub x1, x3, x10
-            mov x21, x1
-            sub x2, x4, x9
-            mov x22, x2
-            bl draw_pixel
-
-            // trazo una linea horizontal entre los puntos de la circunferencia con igual coordenada y
-            stp x3, x4, [sp, #-16]!
-            mov x1, x19   
-            mov x2, x20
-            mov x3, x21
-            mov x4, x22
+            
+            // Línea 4: de (xc-y, yc-x) a (xc+y, yc-x)
+            sub x1, x19, x10            // x1 = xc - y (punto inicial)
+            sub x2, x20, x9             // x2 = yc - x
+            add x3, x19, x10            // x3 = xc + y (punto final)
+            mov x4, x2                  // x4 = yc - x (misma y)
             bl draw_line
-            ldp x3, x4, [sp], #16
 
-
+            mov x3, x19
+            mov x4, x20
             add x9, x9, #1          // x++
             b ._fill_circle_loop
 
     ._fill_circle_end:
         ldr lr, [sp], #8
-        ldr x22, [sp], #8
-        ldr x21, [sp], #8
-        ldr x20, [sp], #8
-        ldr x19, [sp], #8
+        ldp x21, x22, [sp], #16
+        ldp x19, x20, [sp], #16
     ret
 
 
@@ -379,11 +310,13 @@ draw_fill_circle:
                x12, x13 (auxiliares)
 */
 draw_fill_semi_circle:
-    str x19, [sp, #-8]!
-    str x20, [sp, #-8]!
-    str x21, [sp, #-8]!
-    str x22, [sp, #-8]!
+    stp x19, x20, [sp, #-16]!
+    stp x21, x22, [sp, #-16]!
     str lr, [sp, #-8]!
+
+    // Guardar xc, yc en registros callee-saved para no perderlo
+    mov x19, x3
+    mov x20, x4
 
     mov x9, xzr                 // x=0
     sub x10, xzr, x5            // y=-r
@@ -413,64 +346,25 @@ draw_fill_semi_circle:
             b ._fill_semi_circle_draw
 
         ._fill_semi_circle_draw:
-
-            // pinto pixel en (xc+x, yc+y)
-            add x1, x3, x9
-            mov x19, x1
-            add x2, x4, x10
-            mov x20, x2
-            bl draw_pixel
-
-            // pinto pixel en (xc-x, yc+y)
-            sub x1, x3, x9
-            mov x21, x1
-            add x2, x4, x10
-            mov x22, x2
-            bl draw_pixel
-
-            // trazo una linea horizontal entre los puntos de la circunferencia con igual coordenada y
-            stp x3, x4, [sp, #-16]!
-            mov x1, x19   
-            mov x2, x20
-            mov x3, x21
-            mov x4, x22
+            sub x1, x19, x9
+            add x2, x20, x10
+            add x3, x19, x9
+            mov x4, x2
             bl draw_line
-            ldp x3, x4, [sp], #16
 
-
-            // pinto pixel en (xc+y, yc-x)
-            add x1, x3, x10
-            mov x19, x1
-            sub x2, x4, x9
-            mov x20, x2
-            bl draw_pixel
-
-            // pinto pixel en (xc-y, yc-x)
-            sub x1, x3, x10
-            mov x21, x1
-            sub x2, x4, x9
-            mov x22, x2
-            bl draw_pixel
-
-            // trazo una linea horizontal entre los puntos de la circunferencia con igual coordenada y
-            stp x3, x4, [sp, #-16]!
-            mov x1, x19   
-            mov x2, x20
-            mov x3, x21
-            mov x4, x22
+            add x1, x19, x10
+            sub x2, x20, x9 
+            sub x3, x19, x10
+            mov x4, x2
             bl draw_line
-            ldp x3, x4, [sp], #16
-
 
             add x9, x9, #1          // x++
             b ._fill_semi_circle_loop
 
     ._fill_semi_circle_end:
         ldr lr, [sp], #8
-        ldr x22, [sp], #8
-        ldr x21, [sp], #8
-        ldr x20, [sp], #8
-        ldr x19, [sp], #8
+        ldp x21, x22, [sp], #16
+        ldp x19, x20, [sp], #16
     ret
 
 
@@ -904,18 +798,3 @@ draw_parallelogram:
     ._end_intersection:
     ldr x30, [sp], #16      // Restaurar LR
     ret
-
-
-/*  Function: abs
-    Description: Calcula el valor absoluto del registro x7
-    Inputs:
-        - x7: Número signado
-    Outputs:
-        - x7
-*/
-abs:
-    cmp x7, #0
-    cneg x7, x7, lt
-    ret
-
-    
