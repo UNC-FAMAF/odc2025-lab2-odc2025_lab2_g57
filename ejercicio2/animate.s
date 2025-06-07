@@ -112,7 +112,7 @@ draw_gary:
 
     movz x0, #0x8b, lsl #16
     movk x0, #0xc7eb, lsl #0
-    add x1, x17, #17
+    add x1, x17, #25
     sub x2, x18, #5
     add x3, x17, #41
     sub x4, x18, #4
@@ -184,12 +184,12 @@ draw_gary:
     movz x0, #0xff, lsl #16
     movk x0, #0x8d31, lsl #0
     add x3, x17, #31
-    sub x4, x18, #17
+    sub x4, x18, #25
     mov x5, #3
     bl draw_fill_circle
 
     add x3, x17, #46
-    sub x4, x18, #17
+    sub x4, x18, #25
     mov x5, #3
     bl draw_fill_circle
 

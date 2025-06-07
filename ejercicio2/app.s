@@ -80,19 +80,19 @@ animation_loop:
 	bl draw_casa_bob
 
 	// ACTUALIZAR POSICIONES BURBUJAS
-	sub x19, x19, #8
-	sub x20, x20, #12
-	sub x21, x21, #16
-	sub x22, x22, #12
-	sub x23, x23, #16
-	sub x24, x24, #12
+	sub x19, x19, #16
+	sub x20, x20, #24
+	sub x21, x21, #32
+	sub x22, x22, #24
+	sub x23, x23, #32
+	sub x24, x24, #24
 
 	// ACTUALIZAR POSICION MEDUSA
-	add x25, x25, #8   // mover 2 en x
-	sub x26, x26, #4   // mover -1 en y
+	add x25, x25, #16   // mover 2 en x
+	sub x26, x26, #8  // mover -1 en y
 
 	// ACTUALIZAR POSICION GARY
-	add x17, x17, #8   // mover 2 en x hacia la derecha
+	add x17, x17, #16   // mover 2 en x hacia la derecha
 
 	// VERIFICAR REINICIO BURBUJAS
 	cmp x19, #0
@@ -121,7 +121,7 @@ reset_gary:
 	b continue_animation
 
 continue_animation:
-	mov x9, #10
+	mov x9, #20
 	bl delay
 
 	b animation_loop
