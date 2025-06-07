@@ -1,5 +1,5 @@
 Nombre y apellido 
-Integrante 1: Franciscos Lopez Benavides
+Integrante 1: Francisco Lopez Benavides
 Integrante 2: Gonzalo Cisnero
 Integrante 3: Alé Prieto
 Integrante 4: Franco Javier Brizuela
